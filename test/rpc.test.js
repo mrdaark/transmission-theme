@@ -3,6 +3,19 @@ import assert from 'node:assert/strict';
 import { TransmissionRPC } from '../lib/rpc.js';
 
 const ok = args => Response.json({ result: 'success', arguments: args });
+test('calls browser fetch with the global receiver', async t => {
+  const requests = [];
+  t.mock.method(globalThis, 'fetch', async function (url, options) {
+    if (this !== globalThis) throw new TypeError('Illegal invocation');
+    requests.push({ url, ...options });
+    return ok({ version: '4.1.3' });
+  });
+  const client = new TransmissionRPC('/transmission/rpc');
+  assert.deepEqual(await client.call('session-get'), { version: '4.1.3' });
+  assert.equal(requests.length, 1);
+  assert.equal(requests[0].url, '/transmission/rpc');
+  assert.equal(JSON.parse(requests[0].body).method, 'session-get');
+});
 test('negotiates and reuses the Transmission CSRF token without changing the operation', async () => {
   const requests = [];
   const client = new TransmissionRPC('/transmission/rpc', { fetchImpl: async (url, options) => {
