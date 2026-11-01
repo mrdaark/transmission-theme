@@ -168,7 +168,7 @@ svg.icon {
   align-items:center;
   justify-content:space-between
 }
-.nav-heading span {
+.nav-heading #labels-count {
   font-size:12px;
   font-family:var(--mono);
   letter-spacing:0
@@ -426,7 +426,7 @@ h1 {
   align-items:center;
   gap:12px
 }
-h1>span {
+h1>#total-count {
   font-size:13px;
   font-family:var(--mono);
   color:#a4a9b4;
