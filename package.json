@@ -1,0 +1,14 @@
+{
+  "name": "transmission-theme",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A quiet, responsive Transmission web interface.",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "test": "node --test",
+    "check": "node --check app.js && node --check lib/rpc.js && node --check lib/model.js && node --check lib/demo.js",
+    "build": "node scripts/build.mjs"
+  },
+  "engines": { "node": ">=22" }
+}

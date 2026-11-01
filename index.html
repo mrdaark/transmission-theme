@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0b0d">
+  <meta name="description" content="Лёгкий адаптивный веб-интерфейс Transmission">
+  <meta name="referrer" content="no-referrer">
+  <title>Transmission</title>
+  <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <svg class="icon-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v16m-6-6 6 6 6-6"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 20V4m-6 6 6-6 6 6"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="m10 13 4-4m-6 7-1 1a4.24 4.24 0 0 1-6-6l4-4a4.24 4.24 0 0 1 6 0m2 1 1-1a4.24 4.24 0 0 1 6 6l-4 4a4.24 4.24 0 0 1-6 0" transform="translate(1 1)"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M7 5h3v14H7zM14 5h3v14h-3z"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7z"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7V5h6l2 2h10v13H3z"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 6h6m4 0h6M4 12h10m4 0h2M4 18h2m4 0h10M10 3v6m4 0v6M6 15v6"/></symbol>
+    <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M5 19a9 9 0 1 1 14 0m-7-7 4-4"/><circle cx="12" cy="12" r="1"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 7V2m0 5h-5M4 17v5m0-5h5M5 8a8 8 0 0 1 13-3l2 2M4 17l2 2a8 8 0 0 0 13-3"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H5v18h14V8zM14 3v5h5M9 12h6m-6 4h6"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.01"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="m12 3 10 18H2zM12 9v5m0 3v.01"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M15 8V3H3v13h5"/></symbol>
+    <symbol id="i-tag" viewBox="0 0 24 24"><path d="M3 3h8l10 10-8 8L3 11zM7 7h.01"/></symbol>
+  </defs></svg>
+
+  <div id="demo-banner" class="demo-banner" hidden>Демо · Пример данных. Подключения к серверу нет. <a href="?">Подключиться к Transmission</a></div>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Навигация">
+      <a href="./" class="brand"><span class="brand-icon"><svg class="icon"><use href="#i-download"/></svg></span><span>Transmission<span class="brand-caption">WEB CLIENT</span></span></a>
+      <div class="nav-heading">Библиотека</div>
+      <nav id="filters" class="filters" aria-label="Состояние торрентов"></nav>
+      <div class="label-section"><div class="nav-heading">Метки <span id="labels-count"></span></div><nav id="labels" aria-label="Метки торрентов"></nav></div>
+      <div class="sidebar-bottom">
+        <section class="transfer-card" aria-label="Скорость передачи">
+          <div class="transfer-label">СКАЧИВАНИЕ <span class="live-dot"></span></div>
+          <div class="download-value"><span id="download-rate">0</span><span id="download-unit">Б/с</span></div>
+          <svg class="speed-chart" viewBox="0 0 180 42" preserveAspectRatio="none" aria-label="Скорость за последнюю минуту" role="img"><defs><linearGradient id="chart-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#65a6ff" stop-opacity=".16"/><stop offset="100%" stop-color="#65a6ff" stop-opacity="0"/></linearGradient></defs><path id="speed-area" fill="url(#chart-fill)"/><path id="speed-line" fill="none" stroke="#6ca9ff" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>
+          <div class="upload-line"><span><svg class="icon"><use href="#i-up"/></svg> <span id="upload-rate">0 Б/с</span></span><span id="speed-limit">без лимита</span></div>
+          <button class="alt-speed" id="alt-speed" type="button" aria-pressed="false"><svg class="icon"><use href="#i-gauge"/></svg> Альт. лимиты <span class="toggle-track"><span></span></span></button>
+        </section>
+        <button class="settings-link" data-open="settings"><svg class="icon"><use href="#i-sliders"/></svg> Настройки <kbd>⌘ ,</kbd></button>
+        <div class="sidebar-footnote"><span id="server-version">Transmission RPC</span><span class="connection-dot"></span></div>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <header class="page-header">
+        <div class="desktop-title"><div class="eyebrow">ВАША БИБЛИОТЕКА</div><h1 id="page-title">Все торренты <span id="total-count">0</span></h1></div>
+        <a href="./" class="mobile-brand"><span class="brand-icon"><svg class="icon"><use href="#i-download"/></svg></span>Transmission</a>
+        <div class="header-right"><div class="mobile-rates"><span class="blue">↓ <span id="mobile-down">0 Б/с</span></span><span>↑ <span id="mobile-up">0 Б/с</span></span></div><span id="connection-status" class="connection-status"><span class="connection-dot"></span> Подключение…</span><button class="icon-button mobile-settings" data-open="settings" aria-label="Настройки"><svg class="icon"><use href="#i-sliders"/></svg></button></div>
+      </header>
+
+      <div class="toolbar">
+        <label class="search-field"><svg class="icon"><use href="#i-search"/></svg><input id="search" type="search" placeholder="Поиск торрентов…" autocomplete="off" aria-label="Поиск торрентов"><kbd>/</kbd></label>
+        <div class="toolbar-actions"><button class="button primary" data-open="add"><svg class="icon"><use href="#i-plus"/></svg> Добавить торрент</button><button class="button" data-open="magnet"><svg class="icon"><use href="#i-link"/></svg><span>Добавить magnet</span></button><button class="button" id="pause-all"><svg class="icon"><use href="#i-pause"/></svg><span>Пауза для всех</span></button></div>
+      </div>
+      <nav id="mobile-filters" class="mobile-filters" aria-label="Состояние торрентов"></nav>
+      <div id="connection-error" class="connection-error" role="status" hidden><svg class="icon"><use href="#i-alert"/></svg><span id="error-message"></span><button id="retry" class="text-button">Повторить</button></div>
+
+      <section class="torrent-section" aria-label="Торренты">
+        <div class="list-meta"><span><span id="shown-count">0 торрентов</span><span class="meta-divider">/</span><span id="total-size">0 Б</span></span><label class="sort-control">Сортировка <select id="sort" aria-label="Сортировка"><option value="added">Сначала новые</option><option value="name">По названию</option><option value="progress">По прогрессу</option><option value="speed">По скорости</option><option value="size">По размеру</option></select></label></div>
+        <div class="torrent-table">
+          <div class="table-head" aria-hidden="true"><span></span><span>Название</span><span>Статус</span><span>Прогресс</span><span>↓ Скорость</span><span>Размер</span><span></span></div>
+          <div id="torrent-list" class="torrent-list" aria-busy="true"></div>
+          <div id="empty-state" class="empty-state" hidden><div class="empty-icon"><svg class="icon"><use href="#i-download"/></svg></div><h2 id="empty-title">Здесь будут ваши торренты</h2><p id="empty-description">Добавьте .torrent-файл или magnet-ссылку, чтобы начать загрузку.</p><button class="button primary" id="empty-add" data-open="add"><svg class="icon"><use href="#i-plus"/></svg> Добавить торрент</button><a id="demo-link" href="?demo=1" hidden>Посмотреть демо интерфейса →</a></div>
+        </div>
+        <footer class="list-footer"><span id="list-footer-text">Обновление каждые 2 секунды</span><span class="footer-hint">Нажмите на торрент, чтобы открыть подробности <svg class="icon"><use href="#i-info"/></svg></span></footer>
+      </section>
+
+      <section id="inspector" class="inspector" aria-label="Подробности торрента" hidden>
+        <div class="inspector-top"><div id="piece-map" class="piece-map" aria-label="Загруженные части"></div><div class="inspector-summary"><div class="inspector-heading"><h2 id="detail-name"></h2><button id="close-inspector" class="icon-button" aria-label="Закрыть подробности"><svg class="icon"><use href="#i-close"/></svg></button></div><div id="detail-badges" class="detail-badges"></div><div class="detail-progress-line"><div id="detail-progress" class="progress"></div><strong id="detail-percent"></strong></div><div id="detail-stats" class="detail-stats"></div></div></div>
+        <div class="inspector-toolbar"><div class="tabs" role="tablist" aria-label="Подробности"><button class="tab active" id="tab-files" role="tab" aria-selected="true" aria-controls="detail-content" data-tab="files">Файлы</button><button class="tab" id="tab-trackers" role="tab" aria-selected="false" aria-controls="detail-content" data-tab="trackers" tabindex="-1">Трекеры</button><button class="tab" id="tab-peers" role="tab" aria-selected="false" aria-controls="detail-content" data-tab="peers" tabindex="-1">Пиры</button><button class="tab" id="tab-info" role="tab" aria-selected="false" aria-controls="detail-content" data-tab="info" tabindex="-1">Сведения</button></div><div id="detail-actions" class="detail-actions"></div></div>
+        <div id="detail-content" class="detail-content" role="tabpanel" aria-labelledby="tab-files" tabindex="0"></div>
+      </section>
+      <footer class="workspace-footer"><span class="footer-brand">TRANSMISSION <span>/</span> WEB</span><span id="session-count">Все данные — на вашем сервере</span></footer>
+    </main>
+  </div>
+  <div class="mobile-dock"><button class="button primary" data-open="add"><svg class="icon"><use href="#i-plus"/></svg> Добавить торрент</button><button class="icon-button" data-open="magnet" aria-label="Добавить magnet-ссылку"><svg class="icon"><use href="#i-link"/></svg></button><button class="icon-button" id="mobile-alt" aria-label="Альтернативные лимиты скорости" aria-pressed="false"><svg class="icon"><use href="#i-gauge"/></svg></button></div>
+
+  <dialog id="add-dialog" class="modal"><form id="add-form"><div class="modal-heading"><div><div class="eyebrow">БИБЛИОТЕКА</div><h2>Добавить торрент</h2></div><button type="button" class="icon-button" data-close aria-label="Закрыть"><svg class="icon"><use href="#i-close"/></svg></button></div><div class="modal-body"><label class="drop-zone" id="drop-zone"><input id="torrent-file" type="file" accept=".torrent,application/x-bittorrent" multiple><span class="drop-icon"><svg class="icon"><use href="#i-download"/></svg></span><strong id="file-label">Выберите .torrent-файлы</strong><span>или перетащите их сюда · до 10 МБ каждый</span></label><div class="form-divider"><span>или добавьте ссылку</span></div><label class="field-label" for="torrent-url">Magnet или URL .torrent</label><input id="torrent-url" class="form-input" type="text" placeholder="magnet:?xt=urn:btih:…" autocomplete="off" spellcheck="false"><label class="field-label" for="download-dir">Папка загрузки на сервере</label><input id="download-dir" class="form-input" type="text" placeholder="По умолчанию" autocomplete="off"><label class="check-label"><input id="start-added" type="checkbox" checked> Начать скачивание сразу</label><p id="add-error" class="form-error" role="alert" hidden></p></div><div class="modal-footer"><button type="button" class="button" data-close>Отмена</button><button id="add-submit" class="button primary" type="submit"><svg class="icon"><use href="#i-plus"/></svg> Добавить</button></div></form></dialog>
+
+  <dialog id="settings-dialog" class="modal"><form id="settings-form"><div class="modal-heading"><div><div class="eyebrow">TRANSMISSION</div><h2>Настройки</h2></div><button type="button" class="icon-button" data-close aria-label="Закрыть"><svg class="icon"><use href="#i-close"/></svg></button></div><div class="modal-body"><h3>Загрузки</h3><label class="field-label" for="setting-dir">Папка загрузки на сервере</label><input id="setting-dir" class="form-input" type="text"><div class="settings-grid"><div><label class="check-label"><input id="limit-down-enabled" type="checkbox"> Лимит скачивания</label><label class="unit-field"><input id="limit-down" type="number" min="0" step="1" required aria-label="Лимит скачивания"><span>КБ/с</span></label></div><div><label class="check-label"><input id="limit-up-enabled" type="checkbox"> Лимит отдачи</label><label class="unit-field"><input id="limit-up" type="number" min="0" step="1" required aria-label="Лимит отдачи"><span>КБ/с</span></label></div></div><h3>Альтернативные лимиты</h3><div class="settings-grid"><div><label class="field-label" for="alt-down">Скачивание, КБ/с</label><input id="alt-down" class="form-input" type="number" min="0" step="1" required></div><div><label class="field-label" for="alt-up">Отдача, КБ/с</label><input id="alt-up" class="form-input" type="number" min="0" step="1" required></div></div><h3>Интерфейс</h3><label class="field-label" for="refresh-interval">Обновлять список</label><select class="form-input" id="refresh-interval"><option value="2000">Каждые 2 секунды</option><option value="5000">Каждые 5 секунд</option><option value="10000">Каждые 10 секунд</option></select><label class="field-label" for="rpc-path">Путь к RPC</label><input id="rpc-path" class="form-input" placeholder="/transmission/rpc" required><p class="field-hint">На том же сервере, что и веб-интерфейс. Для нестандартного reverse proxy.</p><p id="settings-error" class="form-error" role="alert" hidden></p></div><div class="modal-footer"><button type="button" class="button" data-close>Отмена</button><button class="button primary" id="settings-submit" type="submit">Сохранить</button></div></form></dialog>
+
+  <dialog id="remove-dialog" class="modal small-modal"><form id="remove-form"><div class="modal-heading"><h2>Удалить торрент?</h2><button type="button" class="icon-button" data-close aria-label="Закрыть"><svg class="icon"><use href="#i-close"/></svg></button></div><div class="modal-body"><p id="remove-name" class="remove-name"></p><label class="check-label danger-check"><input type="checkbox" id="delete-data"> Также удалить скачанные файлы с диска</label><p class="field-hint">Удаление файлов нельзя отменить.</p><p id="remove-error" class="form-error" role="alert" hidden></p></div><div class="modal-footer"><button type="button" class="button" data-close>Отмена</button><button type="submit" class="button danger" id="remove-submit">Удалить торрент</button></div></form></dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <noscript>Для работы интерфейса Transmission включите JavaScript.</noscript>
+</body>
+</html>
