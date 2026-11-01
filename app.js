@@ -1,6 +1,6 @@
 import { TransmissionRPC } from './lib/rpc.js';
 import { DemoRPC } from './lib/demo.js';
-import { FILTERS, LIST_FIELDS, DETAIL_FIELDS, filterTorrents, matchesFilter, status, percent, formatBytes, formatEta, torrentCount, escapeHtml as e, rpcPath, validateRpcPath, validateTorrentUrl } from './lib/model.js';
+import { FILTERS, LIST_FIELDS, DETAIL_FIELDS, filterTorrents, matchesFilter, normalizeLabels, status, percent, formatBytes, formatEta, torrentCount, escapeHtml as e, rpcPath, validateRpcPath, validateTorrentUrl } from './lib/model.js';
 
 const $ = id => document.getElementById(id);
 const icon = name => `<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
@@ -39,7 +39,7 @@ function setConnection(connected, message = '') {
 }
 function progressMarkup(t, extra = '') {
   const value = t.status === 2 ? t.recheckProgress : t.percentDone;
-  return `<div class="progress ${status(t).tone} ${extra}" style="--progress:${percent(value)}%" role="progressbar" aria-label="${t.status === 2 ? 'Проверка' : 'Загрузка'}" aria-valuenow="${Math.round(percent(value))}" aria-valuemin="0" aria-valuemax="100"></div>`;
+  return `<div class="progress ${extra}" style="--progress:${percent(value)}%" role="progressbar" aria-label="${t.status === 2 ? 'Проверка' : 'Загрузка'}" aria-valuenow="${Math.round(percent(value))}" aria-valuemin="0" aria-valuemax="100"></div>`;
 }
 function renderFilters() {
   const counts = Object.fromEntries(FILTERS.map(f => [f.id, state.torrents.filter(t => matchesFilter(t, f.id)).length]));
@@ -125,12 +125,12 @@ function renderInspector() {
   text('detail-name', t.name);
   const detail = state.detailId === t.id ? state.detail : null;
   const s = status(t);
-  $('detail-badges').innerHTML = `<span class="badge ${s.tone}">${s.label}</span><span class="badge">${detail ? `${detail.files?.length || 0} файлов` : 'Метаданные…'}</span><span class="badge">${t.peersConnected || 0} пиров</span><span class="badge">${e(formatBytes(t.sizeWhenDone))}</span>`;
+  $('detail-badges').innerHTML = `<span class="badge ${s.tone}">${s.label}</span><span class="badge">${detail ? `${detail.files?.length || 0} файлов` : 'Метаданные…'}</span><span class="badge">${t.peersConnected || 0} пиров</span><span class="badge">${e(formatBytes(t.sizeWhenDone))}</span>${(t.labels || []).map(label => `<span class="badge label-badge" title="${e(label)}">${e(label)}</span>`).join('')}`;
   $('detail-progress').outerHTML = progressMarkup(t).replace('class="progress', 'id="detail-progress" class="progress');
   text('detail-percent', `${Math.floor(percent(t.status === 2 ? t.recheckProgress : t.percentDone))}%`);
   $('detail-stats').innerHTML = `<span>${icon('down')} <b>${e(formatBytes(t.rateDownload, true))}</b></span><span>${icon('up')} <b>${e(formatBytes(t.rateUpload, true))}</b></span><span>осталось <b>${e(t.percentDone >= 1 ? '—' : formatEta(t.eta))}</b></span><span>скачано <b>${e(formatBytes(t.downloadedEver))}</b></span><span>отдано <b>${e(formatBytes(t.uploadedEver))}</b></span>`;
   const disabled = !state.connected || operationBusy ? 'disabled' : '';
-  restoreFocusAfterRender($('detail-actions'), `<button class="button" data-action="${t.status === 0 ? 'start' : 'stop'}" ${disabled}>${icon(t.status === 0 ? 'play' : 'pause')}${t.status === 0 ? 'Запустить' : 'Приостановить'}</button><button class="icon-button" data-action="verify" title="Проверить локальные данные" aria-label="Проверить локальные данные" ${disabled}>${icon('refresh')}</button><button class="icon-button" data-action="copy" title="Скопировать magnet" aria-label="Скопировать magnet" ${!detail?.magnetLink ? 'disabled' : ''}>${icon('link')}</button><button class="icon-button danger-icon" data-action="remove" title="Удалить торрент" aria-label="Удалить торрент" ${disabled}>${icon('trash')}</button>`);
+  restoreFocusAfterRender($('detail-actions'), `<button class="button" data-action="labels" ${disabled}>${icon('tag')}Метки</button><button class="button" data-action="${t.status === 0 ? 'start' : 'stop'}" ${disabled}>${icon(t.status === 0 ? 'play' : 'pause')}${t.status === 0 ? 'Запустить' : 'Приостановить'}</button><button class="icon-button" data-action="verify" title="Проверить локальные данные" aria-label="Проверить локальные данные" ${disabled}>${icon('refresh')}</button><button class="icon-button" data-action="copy" title="Скопировать magnet" aria-label="Скопировать magnet" ${!detail?.magnetLink ? 'disabled' : ''}>${icon('link')}</button><button class="icon-button danger-icon" data-action="remove" title="Удалить торрент" aria-label="Удалить торрент" ${disabled}>${icon('trash')}</button>`);
   renderPieces(detail);
   renderDetailContent();
 }
@@ -258,6 +258,7 @@ let removeTarget = null;
 async function action(name, id = state.selectedId) {
   const t = state.torrents.find(t => t.id === id);
   if (!t) return;
+  if (name === 'labels') { openLabels(t); return; }
   if (name === 'remove') {
     removeTarget = { id: t.id, name: t.name };
     text('remove-name', t.name); $('delete-data').checked = false; $('remove-error').hidden = true;
@@ -274,6 +275,60 @@ async function action(name, id = state.selectedId) {
   const method = { start: 'torrent-start', stop: 'torrent-stop', verify: 'torrent-verify', reannounce: 'torrent-reannounce' }[name];
   if (method) await mutate(method, { ids: [id] }, { start: 'Торрент запущен', stop: 'Торрент приостановлен', verify: 'Проверка данных запрошена', reannounce: 'Запрошено обновление трекеров' }[name]);
 }
+let labelsTarget = null, labelsDraft = [], labelsSaving = false;
+function openLabels(t) {
+  labelsTarget = { id: t.id, client: rpc, generation };
+  labelsDraft = normalizeLabels(t.labels || []);
+  text('labels-torrent-name', t.name);
+  $('new-label').value = ''; $('labels-error').hidden = true;
+  renderLabelEditor();
+  $('labels-dialog').showModal();
+  $('new-label').focus();
+}
+function renderLabelEditor() {
+  $('assigned-labels').innerHTML = labelsDraft.length ? labelsDraft.map((label, i) => `<button type="button" class="label-chip selected" data-remove-label="${i}" aria-label="Убрать метку ${e(label)}">${icon('tag')}<span>${e(label)}</span>${icon('close')}</button>`).join('') : '<p class="field-hint">У этого торрента пока нет меток.</p>';
+  const available = normalizeLabels(state.torrents.flatMap(t => t.labels || [])).filter(label => !labelsDraft.includes(label)).sort((a, b) => a.localeCompare(b, 'ru'));
+  $('label-suggestions').innerHTML = available.map(label => `<button type="button" class="label-chip" data-suggest-label="${e(label)}">${icon('plus')}<span>${e(label)}</span></button>`).join('');
+  $('suggested-labels').hidden = !available.length;
+}
+function addDraftLabel() {
+  labelsDraft = normalizeLabels([...labelsDraft, $('new-label').value]);
+  $('new-label').value = ''; renderLabelEditor(); $('new-label').focus();
+}
+$('add-label').addEventListener('click', addDraftLabel);
+$('new-label').addEventListener('keydown', event => {
+  if (event.key === 'Enter' && !event.isComposing) { event.preventDefault(); addDraftLabel(); }
+});
+$('labels-dialog').addEventListener('click', event => {
+  const remove = event.target.closest('[data-remove-label]'), suggestion = event.target.closest('[data-suggest-label]');
+  if (remove) { labelsDraft.splice(Number(remove.dataset.removeLabel), 1); renderLabelEditor(); }
+  if (suggestion) { labelsDraft = normalizeLabels([...labelsDraft, suggestion.dataset.suggestLabel]); renderLabelEditor(); }
+});
+$('labels-dialog').addEventListener('cancel', event => { if (labelsSaving) event.preventDefault(); });
+$('labels-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  if (labelsSaving) return;
+  const target = labelsTarget;
+  if (!target || target.generation !== generation || !state.connected || !state.torrents.some(t => t.id === target.id)) {
+    showFormError('labels-error', 'Торрент недоступен. Проверьте подключение и откройте редактор заново.'); return;
+  }
+  const labels = normalizeLabels([...labelsDraft, $('new-label').value]);
+  labelsSaving = true; $('labels-error').hidden = true;
+  const controls = [...$('labels-form').querySelectorAll('button, input')];
+  controls.forEach(control => { control.disabled = true; });
+  try {
+    await target.client.call('torrent-set', { ids: [target.id], labels });
+    if (generation === target.generation) {
+      const torrent = state.torrents.find(t => t.id === target.id);
+      if (torrent) torrent.labels = labels;
+      // Return to the full list if the last torrent loses the selected label.
+      if (state.label !== null && !state.torrents.some(t => (t.labels || []).includes(state.label))) state.label = null;
+      renderList(); renderInspector();
+    }
+    $('labels-dialog').close(); toast('Метки сохранены');
+  } catch (error) { showFormError('labels-error', errorText(error)); }
+  finally { labelsSaving = false; controls.forEach(control => { control.disabled = false; }); void poll(); }
+});
 function openAdd(magnet = false) {
   $('add-form').reset(); state.files = []; text('file-label', 'Выберите .torrent-файлы');
   $('download-dir').value = state.session['download-dir'] || '';

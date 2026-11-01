@@ -16,7 +16,7 @@
   --mono:ui-monospace,"SFMono-Regular",Consolas,"Liberation Mono",monospace;
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   font-family:var(--sans);
-  font-size:13px;
+  font-size:15px;
   font-weight:400;
   -webkit-font-smoothing:antialiased
 }
@@ -110,7 +110,7 @@ svg.icon {
 }
 .app-shell {
   display:grid;
-  grid-template-columns:216px minmax(0,1fr);
+  grid-template-columns:228px minmax(0,1fr);
   height:100dvh;
   min-height:560px;
   overflow:hidden
@@ -128,10 +128,10 @@ svg.icon {
   align-items:center;
   gap:10px;
   color:var(--text);
-  font-size:17px;
+  font-size:18px;
   font-weight:650;
   letter-spacing:-.55px;
-  margin:0 10px 44px
+  margin:0 10px 32px
 }
 .brand-icon {
   display:grid;
@@ -150,14 +150,14 @@ svg.icon {
 }
 .brand-caption {
   display:block;
-  font-size:8px;
+  font-size:10px;
   font-weight:500;
   letter-spacing:2px;
   color:var(--faint);
   margin-top:5px
 }
 .nav-heading {
-  font-size:10px;
+  font-size:12px;
   font-weight:600;
   letter-spacing:1.35px;
   color:var(--faint);
@@ -169,7 +169,7 @@ svg.icon {
   justify-content:space-between
 }
 .nav-heading span {
-  font-size:10px;
+  font-size:12px;
   font-family:var(--mono);
   letter-spacing:0
 }
@@ -183,12 +183,12 @@ svg.icon {
   gap:12px;
   position:relative;
   width:100%;
-  min-height:39px;
+  min-height:43px;
   border-radius:6px;
   text-align:left;
   padding:0 11px;
   color:#a3a6ae;
-  font-size:12px;
+  font-size:14px;
   transition:background .15s,color .15s
 }
 .nav-item>.icon {
@@ -219,7 +219,7 @@ svg.icon {
 }
 .nav-count {
   margin-left:auto;
-  font-size:10px;
+  font-size:12px;
   background:#1b1d22;
   color:#737987;
   min-width:19px;
@@ -234,21 +234,21 @@ svg.icon {
   background:var(--blue)
 }
 .label-section {
-  margin-top:36px
+  margin-top:24px
 }
 .label-section .nav-item {
-  font-size:12px;
-  min-height:35px
+  font-size:14px;
+  min-height:39px
 }
 .no-labels {
-  font-size:11px;
+  font-size:13px;
   color:var(--faint);
   padding:0 12px;
   line-height:1.8
 }
 .sidebar-bottom {
   margin-top:auto;
-  padding-top:30px
+  padding-top:20px
 }
 .transfer-card {
   border:1px solid var(--line);
@@ -257,7 +257,7 @@ svg.icon {
   background:#101114
 }
 .transfer-label {
-  font-size:9px;
+  font-size:11px;
   font-weight:500;
   letter-spacing:1.1px;
   color:#9196a1;
@@ -278,14 +278,14 @@ svg.icon {
   margin-top:8px
 }
 .download-value>span:first-child {
-  font-size:29px;
+  font-size:30px;
   font-weight:500;
   letter-spacing:-1px;
   color:var(--blue);
   line-height:1.1
 }
 .download-value>span:last-child {
-  font-size:10px;
+  font-size:12px;
   color:var(--muted);
   font-family:var(--mono)
 }
@@ -298,7 +298,7 @@ svg.icon {
   display:flex;
   align-items:center;
   justify-content:space-between;
-  font-size:9px;
+  font-size:11px;
   color:var(--faint);
   font-family:var(--mono);
   white-space:nowrap
@@ -320,7 +320,7 @@ svg.icon {
   gap:6px;
   margin-top:14px;
   border-radius:5px;
-  font-size:10px;
+  font-size:12px;
   color:#b1b5bf
 }
 .alt-speed>.icon {
@@ -362,14 +362,14 @@ svg.icon {
   width:100%;
   text-align:left;
   color:#a5a9b2;
-  font-size:12px
+  font-size:14px
 }
 .settings-link .icon {
   width:16px;
   height:16px
 }
 .settings-link kbd {
-  font-size:10px;
+  font-size:12px;
   color:#4c515d;
   font-family:var(--sans);
   margin-left:auto
@@ -379,7 +379,7 @@ svg.icon {
   align-items:center;
   justify-content:space-between;
   padding:0 12px;
-  font-size:9px;
+  font-size:11px;
   color:#4d535f;
   letter-spacing:.3px
 }
@@ -413,13 +413,13 @@ svg.icon {
 }
 .eyebrow {
   color:var(--faint);
-  font-size:9px;
+  font-size:11px;
   font-weight:600;
   letter-spacing:1.7px;
   margin-bottom:9px
 }
 h1 {
-  font-size:25px;
+  font-size:26px;
   font-weight:550;
   letter-spacing:-.8px;
   display:flex;
@@ -427,7 +427,7 @@ h1 {
   gap:12px
 }
 h1>span {
-  font-size:11px;
+  font-size:13px;
   font-family:var(--mono);
   color:#a4a9b4;
   background:#1a1d23;
@@ -446,7 +446,7 @@ h1>span {
   display:flex;
   align-items:center;
   gap:7px;
-  font-size:11px;
+  font-size:13px;
   color:var(--muted)
 }
 .mobile-brand,.mobile-rates,.mobile-settings {
@@ -467,7 +467,7 @@ h1>span {
   border-radius:7px;
   min-width:150px;
   flex:1;
-  height:40px;
+  height:44px;
   padding:0 12px;
   color:#6d7380
 }
@@ -487,7 +487,7 @@ h1>span {
   width:100%;
   outline:none!important;
   height:100%;
-  font-size:12px
+  font-size:14px
 }
 .search-field input::placeholder {
   color:#626874
@@ -502,7 +502,7 @@ h1>span {
   padding:0 5px;
   line-height:18px;
   color:#535966;
-  font-size:10px
+  font-size:12px
 }
 .toolbar-actions {
   display:flex;
@@ -513,13 +513,13 @@ h1>span {
   border:1px solid var(--line);
   background:#121316;
   border-radius:7px;
-  min-height:39px;
+  min-height:43px;
   padding:0 13px;
   display:inline-flex;
   align-items:center;
   justify-content:center;
   gap:8px;
-  font-size:11px;
+  font-size:13px;
   font-weight:500;
   white-space:nowrap;
   transition:background .15s,border-color .15s
@@ -571,7 +571,7 @@ h1>span {
 }
 .text-button {
   color:var(--blue);
-  font-size:12px;
+  font-size:14px;
   white-space:nowrap;
   padding:5px
 }
@@ -588,7 +588,7 @@ h1>span {
   display:flex;
   gap:10px;
   align-items:center;
-  font-size:11px;
+  font-size:13px;
   line-height:1.6
 }
 .connection-error .icon {
@@ -615,7 +615,7 @@ h1>span {
   align-items:center;
   margin:0 2px 13px;
   color:#636976;
-  font-size:10px
+  font-size:12px
 }
 .list-meta>span {
   display:flex;
@@ -629,13 +629,13 @@ h1>span {
   display:flex;
   align-items:center;
   gap:6px;
-  font-size:10px
+  font-size:12px
 }
 .sort-control select {
   color:#a9aeb8;
   border:0;
   background:transparent;
-  font-size:10px;
+  font-size:12px;
   cursor:pointer;
   max-width:150px;
   padding:3px
@@ -655,16 +655,16 @@ h1>span {
 }
 .table-head,.torrent-row {
   display:grid;
-  grid-template-columns:34px minmax(160px,1fr) 132px minmax(130px,180px) 107px 83px 30px;
+  grid-template-columns:34px minmax(160px,1fr) 132px minmax(130px,180px) 107px 83px 34px;
   gap:12px;
   align-items:center;
   padding:0 14px
 }
 .table-head {
-  min-height:39px;
+  min-height:43px;
   border-bottom:1px solid var(--line);
   color:#626875;
-  font-size:10px;
+  font-size:12px;
   background:#111215;
   flex:none
 }
@@ -677,7 +677,7 @@ h1>span {
   min-height:0
 }
 .torrent-row {
-  min-height:79px;
+  min-height:85px;
   border-bottom:1px solid #1b1d22;
   position:relative;
   transition:background .12s;
@@ -734,7 +734,7 @@ h1>span {
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
-  font-size:12px;
+  font-size:14px;
   font-weight:550;
   color:#dfe2e8;
   letter-spacing:.02px;
@@ -742,7 +742,7 @@ h1>span {
   line-height:1.6
 }
 .torrent-subtitle {
-  font-size:9px;
+  font-size:11px;
   color:#656d7a;
   margin-top:5px;
   display:flex;
@@ -757,7 +757,7 @@ h1>span {
   background:#232730;
   border:1px solid #2b303b;
   border-radius:3px;
-  font-size:8px;
+  font-size:10px;
   color:#8f99ac;
   max-width:90px;
   overflow:hidden;
@@ -767,7 +767,7 @@ h1>span {
   display:none
 }
 .row-state {
-  font-size:10px;
+  font-size:12px;
   display:flex;
   align-items:center;
   gap:6px;
@@ -819,17 +819,8 @@ h1>span {
   background:repeating-linear-gradient(to right,var(--progress-color) 0,var(--progress-color) 3px,transparent 3px,transparent 5px);
   transition:width .4s
 }
-.progress.green {
-  --progress-color:#72af99
-}
-.progress.muted {
-  --progress-color:#727b89
-}
-.progress.error {
-  --progress-color:var(--red)
-}
 .progress-percent {
-  font-size:10px;
+  font-size:12px;
   font-family:var(--mono);
   min-width:34px;
   text-align:right;
@@ -837,14 +828,14 @@ h1>span {
 }
 .row-speed,.row-size {
   font-family:var(--mono);
-  font-size:10px;
+  font-size:12px;
   text-align:right;
   white-space:nowrap;
   color:#b8beca
 }
 .row-speed .upload-speed {
   display:block;
-  font-size:9px;
+  font-size:11px;
   color:#5f6877;
   margin-top:5px
 }
@@ -873,7 +864,7 @@ h1>span {
   display:flex;
   align-items:center;
   justify-content:space-between;
-  font-size:9px;
+  font-size:11px;
   color:#515865;
   padding:12px 2px 0;
   gap:12px
@@ -914,19 +905,19 @@ h1>span {
   height:24px
 }
 .empty-state h2 {
-  font-size:17px;
+  font-size:18px;
   font-weight:500;
   letter-spacing:-.3px
 }
 .empty-state p {
   color:var(--muted);
   line-height:1.8;
-  font-size:12px;
+  font-size:14px;
   max-width:360px;
   margin:10px 0 22px
 }
 .empty-state>a {
-  font-size:12px;
+  font-size:14px;
   margin-top:15px
 }
 .skeleton-row {
@@ -1015,7 +1006,7 @@ h1>span {
   margin-top:-3px
 }
 .inspector-heading h2 {
-  font-size:13px;
+  font-size:15px;
   letter-spacing:-.1px;
   font-weight:550;
   overflow:hidden;
@@ -1030,12 +1021,13 @@ h1>span {
 }
 .detail-badges {
   display:flex;
+  flex-wrap:wrap;
   align-items:center;
   gap:6px;
   margin-top:10px
 }
 .badge {
-  font-size:8px;
+  font-size:10px;
   color:#8c94a3;
   background:#20232a;
   padding:3px 6px;
@@ -1064,7 +1056,7 @@ h1>span {
   height:11px
 }
 .detail-progress-line strong {
-  font-size:12px;
+  font-size:14px;
   font-family:var(--mono);
   font-weight:550;
   min-width:34px;
@@ -1078,7 +1070,7 @@ h1>span {
   flex-wrap:wrap;
   margin-top:9px;
   font-family:var(--mono);
-  font-size:9px;
+  font-size:11px;
   color:#798291
 }
 .detail-stats span {
@@ -1096,6 +1088,7 @@ h1>span {
 }
 .inspector-toolbar {
   display:flex;
+  flex-wrap:wrap;
   align-items:center;
   justify-content:space-between;
   border-bottom:1px solid var(--line);
@@ -1108,7 +1101,7 @@ h1>span {
   align-self:stretch
 }
 .tab {
-  font-size:10px;
+  font-size:12px;
   color:#717988;
   padding:11px 2px 12px;
   position:relative
@@ -1127,13 +1120,14 @@ h1>span {
 }
 .detail-actions {
   display:flex;
+  flex-wrap:wrap;
   gap:6px;
   align-items:center;
   padding:0 0 6px
 }
 .detail-actions .button {
-  min-height:27px;
-  font-size:9px;
+  min-height:33px;
+  font-size:11px;
   padding:0 8px;
   border-radius:4px
 }
@@ -1162,7 +1156,7 @@ h1>span {
   gap:10px;
   padding:11px 0;
   border-bottom:1px solid #1e2229;
-  font-size:10px;
+  font-size:12px;
   position:relative;
   min-height:41px
 }
@@ -1179,7 +1173,7 @@ h1>span {
 }
 .file-size,.file-percent {
   font-family:var(--mono);
-  font-size:9px;
+  font-size:11px;
   color:#778292;
   text-align:right
 }
@@ -1188,7 +1182,7 @@ h1>span {
   background:#191c22;
   color:#929cad;
   border-radius:4px;
-  font-size:9px;
+  font-size:11px;
   max-width:100%;
   padding:3px;
   cursor:pointer
@@ -1205,14 +1199,14 @@ h1>span {
 .detail-table {
   width:100%;
   border-collapse:collapse;
-  font-size:10px;
+  font-size:12px;
   text-align:left;
   white-space:nowrap
 }
 .detail-table th {
   color:#586373;
   font-weight:400;
-  font-size:9px;
+  font-size:11px;
   border-bottom:1px solid var(--line);
   padding:13px 9px 10px 0
 }
@@ -1223,7 +1217,7 @@ h1>span {
 }
 .detail-table td:not(:first-child) {
   font-family:var(--mono);
-  font-size:9px
+  font-size:11px
 }
 .detail-table .tracker-host {
   display:block;
@@ -1234,7 +1228,7 @@ h1>span {
 }
 .detail-table .tracker-result {
   display:block;
-  font-size:9px;
+  font-size:11px;
   color:var(--faint);
   margin-top:5px;
   max-width:320px;
@@ -1242,7 +1236,7 @@ h1>span {
   text-overflow:ellipsis
 }
 .detail-message {
-  font-size:11px;
+  font-size:13px;
   color:var(--muted);
   padding:25px 0;
   line-height:1.7
@@ -1252,10 +1246,10 @@ h1>span {
 }
 .info-grid {
   display:grid;
-  grid-template-columns:90px minmax(100px,1fr) 90px minmax(70px,1fr);
+  grid-template-columns:105px minmax(100px,1fr) 105px minmax(70px,1fr);
   gap:13px 20px;
   margin:16px 0;
-  font-size:10px
+  font-size:12px
 }
 .info-grid dt {
   color:#657083
@@ -1268,7 +1262,7 @@ h1>span {
 .info-grid .wide {
   grid-column:2/-1;
   font-family:var(--mono);
-  font-size:9px
+  font-size:11px
 }
 .workspace-footer {
   display:flex;
@@ -1277,11 +1271,11 @@ h1>span {
   gap:20px;
   padding:17px 0 15px;
   flex:none;
-  font-size:9px;
+  font-size:11px;
   color:#4e5663
 }
 .footer-brand {
-  font-size:8px;
+  font-size:10px;
   letter-spacing:1.8px;
   color:#596170
 }
@@ -1314,12 +1308,12 @@ h1>span {
   border-bottom:1px solid var(--line)
 }
 .modal-heading h2 {
-  font-size:21px;
+  font-size:22px;
   font-weight:550;
   letter-spacing:-.5px
 }
 .modal-heading .eyebrow {
-  font-size:8px;
+  font-size:10px;
   margin-bottom:7px
 }
 .modal-heading .icon-button {
@@ -1330,7 +1324,7 @@ h1>span {
 }
 .modal-body h3 {
   font-weight:500;
-  font-size:12px;
+  font-size:14px;
   margin:25px 0 15px;
   color:#d5d9e2
 }
@@ -1346,7 +1340,7 @@ h1>span {
   gap:9px
 }
 .modal-footer .button {
-  font-size:12px;
+  font-size:14px;
   min-height:38px;
   padding:0 17px
 }
@@ -1391,13 +1385,13 @@ h1>span {
   margin-bottom:3px
 }
 .drop-zone strong {
-  font-size:12px;
+  font-size:14px;
   font-weight:500;
   max-width:100%;
   overflow-wrap:anywhere
 }
 .drop-zone>span:last-child {
-  font-size:10px;
+  font-size:12px;
   color:#778396
 }
 .form-divider {
@@ -1406,7 +1400,7 @@ h1>span {
   gap:14px;
   margin:21px 0;
   color:#646d7e;
-  font-size:10px
+  font-size:12px
 }
 .form-divider:before,.form-divider:after {
   content:"";
@@ -1417,7 +1411,7 @@ h1>span {
 .field-label {
   display:block;
   color:#9da6b6;
-  font-size:11px;
+  font-size:13px;
   margin-bottom:8px;
   margin-top:17px
 }
@@ -1427,10 +1421,10 @@ h1>span {
   border:1px solid #2b303a;
   border-radius:6px;
   width:100%;
-  min-height:39px;
+  min-height:43px;
   padding:10px 12px;
   color:#d7deea;
-  font-size:12px
+  font-size:14px
 }
 .form-input::placeholder {
   color:#4f5a6d
@@ -1439,7 +1433,7 @@ h1>span {
   display:flex;
   align-items:center;
   gap:10px;
-  font-size:11px;
+  font-size:13px;
   color:#a6b0c0;
   line-height:1.5;
   margin-top:21px
@@ -1450,7 +1444,7 @@ h1>span {
   gap:18px
 }
 .settings-grid .check-label {
-  font-size:10px;
+  font-size:12px;
   margin-top:3px;
   margin-bottom:11px;
   gap:7px
@@ -1468,7 +1462,7 @@ h1>span {
   padding-right:12px;
   color:#69778d;
   font-family:var(--mono);
-  font-size:10px
+  font-size:12px
 }
 .unit-field input {
   width:100%;
@@ -1477,17 +1471,17 @@ h1>span {
   border:0;
   color:#d7deea;
   padding:11px 12px;
-  font-size:12px
+  font-size:14px
 }
 .field-hint {
-  font-size:10px;
+  font-size:12px;
   line-height:1.8;
   color:#626f82;
   margin-top:9px
 }
 .form-error {
   color:var(--red);
-  font-size:11px;
+  font-size:13px;
   line-height:1.7;
   margin-top:15px;
   overflow-wrap:anywhere
@@ -1505,10 +1499,10 @@ h1>span {
   width:420px
 }
 .small-modal h2 {
-  font-size:18px
+  font-size:19px
 }
 .remove-name {
-  font-size:12px;
+  font-size:14px;
   line-height:1.8;
   color:#b3bdce;
   overflow-wrap:anywhere
@@ -1532,7 +1526,7 @@ h1>span {
   border-radius:9px;
   padding:14px 22px;
   box-shadow:0 10px 40px #0005;
-  font-size:12px;
+  font-size:14px;
   z-index:20;
   max-width:calc(100vw - 32px);
   line-height:1.5;
@@ -1551,7 +1545,7 @@ h1>span {
   gap:10px;
   background:#1a2b43;
   color:#a7c8f5;
-  font-size:10px;
+  font-size:12px;
   line-height:15px
 }
 .demo-banner a {
@@ -1561,6 +1555,61 @@ h1>span {
 }
 .demo-banner:not([hidden])+.app-shell {
   height:calc(100dvh - 29px)
+}
+.label-badge {
+  max-width:160px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#a9cfff;
+  background:#1b2b42;
+}
+.label-chips {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.label-chip {
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  border:1px solid #354055;
+  border-radius:7px;
+  background:#1b222e;
+  color:#a7b5c9;
+  min-height:35px;
+  padding:6px 10px;
+  max-width:100%;
+  font-size:13px;
+}
+.label-chip span {
+  overflow-wrap:anywhere;
+  text-align:left;
+  min-width:0;
+}
+.label-chip .icon {
+  width:14px;
+  height:14px;
+}
+.label-chip.selected {
+  background:#203550;
+  border-color:#426b9f;
+  color:#b8d6ff;
+}
+.label-chip:hover {
+  border-color:var(--blue);
+  background:#253b57;
+}
+.new-label-field {
+  display:flex;
+  gap:8px;
+}
+.new-label-field input {
+  min-width:0;
+}
+.new-label-field .button {
+  flex:none;
+  width:44px;
 }
 @media(min-width:1600px) {
   .workspace {
@@ -1572,25 +1621,25 @@ h1>span {
     gap:18px
   }
   .torrent-row {
-    min-height:84px
+    min-height:90px
   }
   .inspector {
     flex-basis:360px
   }
   .torrent-name {
-    font-size:13px
+    font-size:15px
   }
 }
 @media(max-width:1190px) {
   .app-shell {
-    grid-template-columns:190px minmax(0,1fr)
+    grid-template-columns:202px minmax(0,1fr)
   }
   .sidebar {
     padding-left:10px;
     padding-right:10px
   }
   .brand {
-    font-size:15px;
+    font-size:16px;
     gap:8px;
     margin-left:7px
   }
@@ -1611,20 +1660,20 @@ h1>span {
     display:none
   }
   .table-head,.torrent-row {
-    grid-template-columns:28px minmax(140px,1fr) 105px minmax(110px,140px) 90px 64px 22px;
+    grid-template-columns:28px minmax(140px,1fr) 105px minmax(110px,140px) 90px 64px 32px;
     gap:9px;
     padding-left:12px;
     padding-right:9px
   }
   .row-state {
-    font-size:9px;
+    font-size:11px;
     gap:4px
   }
   .row-state .icon {
     display:none
   }
   .row-speed,.row-size {
-    font-size:9px
+    font-size:11px
   }
   .row-status-icon {
     width:26px;
@@ -1634,11 +1683,11 @@ h1>span {
     height:10px
   }
   .progress-percent {
-    font-size:9px;
+    font-size:11px;
     min-width:29px
   }
   .footer-hint {
-    font-size:8px
+    font-size:10px
   }
   .inspector-top {
     gap:13px;
@@ -1650,30 +1699,30 @@ h1>span {
   }
   .detail-stats {
     gap:9px;
-    font-size:8px
+    font-size:10px
   }
   .torrent-subtitle {
-    font-size:8px
+    font-size:10px
   }
 }
-@media(max-width:980px) and (min-width:901px) {
+@media(max-width:1080px) and (min-width:901px) {
   .toolbar-actions .button:nth-child(2) span {
     display:none
   }
   .toolbar-actions .button:first-child {
-    font-size:10px
+    font-size:12px
   }
   .table-head,.torrent-row {
-    grid-template-columns:26px minmax(120px,1fr) 105px 110px 80px 22px
+    grid-template-columns:26px minmax(120px,1fr) 105px 110px 80px 32px
   }
   .table-head>span:nth-child(6),.row-size {
     display:none
   }
   .row-state {
-    font-size:9px
+    font-size:11px
   }
   .table-head {
-    font-size:9px
+    font-size:11px
   }
   .inspector {
     flex-basis:300px
@@ -1702,7 +1751,7 @@ h1>span {
     margin-top:25px
   }
   .inspector {
-    flex-basis:275px;
+    flex-basis:300px;
     margin-top:15px
   }
   .inspector-top {
@@ -1727,7 +1776,7 @@ h1>span {
     padding:13px 0
   }
   .torrent-row {
-    min-height:71px
+    min-height:77px
   }
 }
 @media(max-width:900px) {
@@ -1735,7 +1784,7 @@ h1>span {
     overflow:hidden;
   }
   :root {
-    font-size:14px
+    font-size:16px
   }
   .app-shell {
     display:block;
@@ -1763,7 +1812,7 @@ h1>span {
     align-items:center;
     gap:11px;
     color:var(--text);
-    font-size:19px;
+    font-size:20px;
     font-weight:600;
     letter-spacing:-.7px
   }
@@ -1775,7 +1824,7 @@ h1>span {
     display:flex!important;
     flex-direction:column;
     font-family:var(--mono);
-    font-size:10px;
+    font-size:12px;
     color:#9298a5;
     gap:5px;
     line-height:1.2;
@@ -1816,7 +1865,7 @@ h1>span {
     box-shadow:0 0 0 3px #ffffff02
   }
   .search-field input {
-    font-size:15px
+    font-size:16px
   }
   .search-field .icon {
     width:20px;
@@ -1845,12 +1894,12 @@ h1>span {
     border:1px solid #292c32;
     border-radius:9px;
     color:#a2a7b0;
-    font-size:12px;
+    font-size:14px;
     white-space:nowrap;
     background:#0d0e10
   }
   .filter-chip>span {
-    font-size:10px;
+    font-size:12px;
     color:#5a6372;
     font-family:var(--mono)
   }
@@ -1868,7 +1917,7 @@ h1>span {
     min-height:400px
   }
   .list-meta {
-    font-size:10px;
+    font-size:12px;
     margin:0 2px 14px
   }
   .sort-control {
@@ -1876,7 +1925,7 @@ h1>span {
     gap:0
   }
   .sort-control select {
-    font-size:10px;
+    font-size:12px;
     color:#737e90;
     max-width:135px
   }
@@ -1898,7 +1947,7 @@ h1>span {
     display:grid;
     grid-template-columns:25px minmax(0,1fr) 25px;
     gap:5px 12px;
-    min-height:107px;
+    min-height:115px;
     padding:18px 15px;
     border-bottom:1px solid #20232a;
     border-radius:0;
@@ -1927,7 +1976,7 @@ h1>span {
     grid-row:1
   }
   .torrent-name {
-    font-size:13px;
+    font-size:15px;
     color:#e0e4eb;
     font-weight:550;
     line-height:1.7
@@ -1935,10 +1984,10 @@ h1>span {
   .torrent-subtitle {
     margin-top:3px;
     gap:7px;
-    font-size:9px
+    font-size:11px
   }
   .torrent-subtitle .row-label {
-    font-size:8px;
+    font-size:10px;
     background:transparent;
     border-color:#2b3039;
     color:#767f90
@@ -1954,7 +2003,7 @@ h1>span {
     background:repeating-linear-gradient(to right,#292e38 0,#292e38 3px,transparent 3px,transparent 5px)
   }
   .progress-percent {
-    font-size:10px;
+    font-size:12px;
     min-width:30px;
     color:#c2c9d5
   }
@@ -1980,7 +2029,7 @@ h1>span {
     grid-row:3;
     justify-content:space-between;
     align-items:center;
-    font-size:10px;
+    font-size:12px;
     gap:10px;
     margin-top:5px;
     min-width:0
@@ -1993,13 +2042,13 @@ h1>span {
   }
   .mobile-row-footer>span:last-child {
     font-family:var(--mono);
-    font-size:9px;
+    font-size:11px;
     color:#818c9e;
     white-space:nowrap
   }
   .list-footer {
     padding-top:15px;
-    font-size:9px
+    font-size:11px
   }
   .footer-hint {
     display:none
@@ -2007,15 +2056,15 @@ h1>span {
   .workspace-footer {
     padding-top:27px;
     padding-bottom:0;
-    font-size:8px
+    font-size:10px
   }
   .footer-brand {
-    font-size:7px;
+    font-size:9px;
     letter-spacing:1.5px
   }
   .connection-error {
     padding:10px 12px;
-    font-size:10px;
+    font-size:12px;
     margin-top:14px;
     gap:7px
   }
@@ -2023,20 +2072,20 @@ h1>span {
     display:none
   }
   .connection-error .text-button {
-    font-size:10px
+    font-size:12px
   }
   .empty-state {
     min-height:360px;
     padding:35px 20px
   }
   .empty-state h2 {
-    font-size:17px
+    font-size:18px
   }
   .empty-state p {
-    font-size:12px
+    font-size:14px
   }
   .empty-state .button {
-    font-size:12px
+    font-size:14px
   }
   .mobile-dock {
     display:flex;
@@ -2055,7 +2104,7 @@ h1>span {
   .mobile-dock>.button {
     flex:1;
     min-height:48px;
-    font-size:13px;
+    font-size:15px;
     border-radius:11px;
     gap:9px
   }
@@ -2109,7 +2158,7 @@ h1>span {
     gap:8px
   }
   .inspector-heading h2 {
-    font-size:13px;
+    font-size:15px;
     line-height:1.6;
     white-space:normal;
     overflow-wrap:anywhere;
@@ -2126,17 +2175,17 @@ h1>span {
     margin-top:9px
   }
   .badge {
-    font-size:8px
+    font-size:10px
   }
   .detail-progress-line {
     margin-top:16px
   }
   .detail-progress-line strong {
-    font-size:11px
+    font-size:13px
   }
   .detail-stats {
     gap:9px;
-    font-size:8px;
+    font-size:10px;
     line-height:1.5
   }
   .inspector-toolbar {
@@ -2152,7 +2201,7 @@ h1>span {
     align-self:auto
   }
   .tab {
-    font-size:12px;
+    font-size:14px;
     padding:15px 10px
   }
   .detail-actions {
@@ -2161,8 +2210,8 @@ h1>span {
     justify-content:flex-end
   }
   .detail-actions .button {
-    font-size:10px;
-    min-height:31px;
+    font-size:12px;
+    min-height:35px;
     padding:0 10px
   }
   .detail-actions .icon-button {
@@ -2182,23 +2231,23 @@ h1>span {
     grid-template-columns:16px minmax(60px,1fr) 52px 65px;
     gap:9px;
     padding:15px 0;
-    font-size:11px;
+    font-size:13px;
     min-height:55px
   }
   .file-row>.icon {
     display:none
   }
   .file-name {
-    font-size:11px
+    font-size:13px
   }
   .file-percent {
     display:none
   }
   .file-size {
-    font-size:9px
+    font-size:11px
   }
   .file-row select {
-    font-size:9px;
+    font-size:11px;
     padding:4px 0
   }
   .file-row:after {
@@ -2206,14 +2255,14 @@ h1>span {
     width:calc((100% - 25px) * var(--progress, 0) / 100)
   }
   .detail-table {
-    font-size:11px
+    font-size:13px
   }
   .detail-table th {
-    font-size:9px;
+    font-size:11px;
     padding:17px 12px 12px 0
   }
   .detail-table td {
-    font-size:10px;
+    font-size:12px;
     padding-top:17px;
     padding-bottom:17px
   }
@@ -2222,18 +2271,18 @@ h1>span {
   }
   .detail-table .tracker-result {
     max-width:190px;
-    font-size:9px
+    font-size:11px
   }
   .info-grid {
     grid-template-columns:75px minmax(0,1fr);
     gap:17px 15px;
     margin:23px 0;
-    font-size:11px;
+    font-size:13px;
     line-height:1.6
   }
   .info-grid .wide {
     grid-column:2;
-    font-size:9px
+    font-size:11px
   }
   .modal {
     border-radius:14px;
@@ -2243,7 +2292,7 @@ h1>span {
     padding:21px 20px
   }
   .modal-heading h2 {
-    font-size:20px
+    font-size:21px
   }
   .modal-body {
     padding:20px
@@ -2252,34 +2301,34 @@ h1>span {
     padding:16px 20px
   }
   .form-input {
-    font-size:16px
+    font-size:17px
   }
   .field-label,.check-label {
-    font-size:12px
+    font-size:14px
   }
   .unit-field input {
-    font-size:16px;
+    font-size:17px;
     min-height:42px
   }
   .settings-grid .check-label {
-    font-size:10px;
+    font-size:12px;
     gap:6px
   }
   .modal-footer .button {
     min-height:41px
   }
   .drop-zone>span:last-child {
-    font-size:9px
+    font-size:11px
   }
   .toast {
     bottom:calc(99px + env(safe-area-inset-bottom));
-    font-size:12px;
+    font-size:14px;
     z-index:15
   }
   .demo-banner {
     height:auto;
-    min-height:40px;
-    font-size:9px;
+    min-height:44px;
+    font-size:11px;
     line-height:1.6;
     gap:0;
     flex-direction:column;
@@ -2305,11 +2354,11 @@ h1>span {
     padding-right:13px
   }
   .mobile-brand {
-    font-size:17px;
+    font-size:18px;
     gap:8px
   }
   .mobile-rates {
-    font-size:8px
+    font-size:10px
   }
   .header-right {
     gap:8px
@@ -2320,7 +2369,7 @@ h1>span {
     gap:7px
   }
   .mobile-dock>.button {
-    font-size:12px
+    font-size:14px
   }
   .mobile-dock>.icon-button {
     width:42px
@@ -2331,7 +2380,7 @@ h1>span {
     gap:5px 9px
   }
   .mobile-row-footer>span:last-child {
-    font-size:8px
+    font-size:10px
   }
 }
 @media(prefers-reduced-motion:reduce) {

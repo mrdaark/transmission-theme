@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { filterTorrents, matchesFilter, status, formatBytes, formatEta, torrentCount, escapeHtml, percent, rpcPath, validateRpcPath, validateTorrentUrl } from '../lib/model.js';
+import { filterTorrents, matchesFilter, normalizeLabels, status, formatBytes, formatEta, torrentCount, escapeHtml, percent, rpcPath, validateRpcPath, validateTorrentUrl } from '../lib/model.js';
 import { DemoRPC } from '../lib/demo.js';
 
 test('filters respect Transmission queued, checking, seeding, paused, and error states', () => {
@@ -22,6 +22,39 @@ test('combines Unicode search and labels, sorts a copy', () => {
   assert.deepEqual(filterTorrents(torrents).map(t => t.id), [2, 1]);
   assert.deepEqual(torrents.map(t => t.id), [1, 2]);
   assert.deepEqual(filterTorrents(torrents, { label: 'Кино' }), []);
+});
+test('active means actual download or upload, excluding idle, queued and paused torrents', () => {
+  for (const torrent of [
+    { status: 4, rateDownload: 1, rateUpload: 0 },
+    { status: 4, rateDownload: 0, rateUpload: 1 },
+    { status: 6, rateDownload: 0, rateUpload: 2000 },
+  ]) assert.equal(matchesFilter(torrent, 'active'), true);
+  for (const torrent of [
+    { status: 4, rateDownload: 0, rateUpload: 0 },
+    { status: 6, rateDownload: 0, rateUpload: 0 },
+    { status: 0, rateDownload: 50, rateUpload: 50 },
+    { status: 3, rateDownload: 0, rateUpload: 0 },
+    { status: 5, rateDownload: 0, rateUpload: 0 },
+    { status: 2, recheckProgress: .5 },
+  ]) assert.equal(matchesFilter(torrent, 'active'), false);
+});
+test('normalizes label drafts without splitting commas or mutating the input', () => {
+  const labels = [' Linux ', '', 'Linux', 'Кино, сериалы', ' Работа ', 'работа'];
+  assert.deepEqual(normalizeLabels(labels), ['Linux', 'Кино, сериалы', 'Работа', 'работа']);
+  assert.equal(labels[0], ' Linux ');
+  assert.deepEqual(normalizeLabels([' ', '']), []);
+});
+test('label assignment replaces and clears only the selected torrent labels and updates filters', async () => {
+  const demo = new DemoRPC();
+  const before = (await demo.call('torrent-get', { ids: [2] })).torrents[0].labels;
+  await demo.call('torrent-set', { ids: [1], labels: ['Тест', '<img src=x>'] });
+  let { torrents } = await demo.call('torrent-get');
+  assert.deepEqual(filterTorrents(torrents, { label: 'Тест', filter: 'active' }).map(t => t.id), [1]);
+  assert.deepEqual(torrents.find(t => t.id === 2).labels, before);
+  await demo.call('torrent-set', { ids: [1], labels: [] });
+  ({ torrents } = await demo.call('torrent-get'));
+  assert.deepEqual(torrents.find(t => t.id === 1).labels, []);
+  assert.deepEqual(filterTorrents(torrents, { label: 'Тест' }), []);
 });
 test('formats unknown ETA, zero bytes, percentages and Russian plurals', () => {
   assert.equal(formatBytes(0), '0 Б');
