@@ -33,7 +33,7 @@ function setConnection(connected, message = '') {
   state.error = message;
   document.body.classList.toggle('connected', connected);
   document.body.classList.toggle('disconnected', !connected);
-  $('connection-status').innerHTML = `<span class="connection-dot"></span>${connected ? demo ? tr('Демонстрация') : tr('Сервер подключён') : tr('Нет подключения')}`;
+  text('connection-status-text', connected ? demo ? tr('Демонстрация') : tr('Сервер подключён') : tr('Нет подключения'));
   $('connection-error').hidden = !message;
   text('error-message', errorText(message));
   $('torrent-list').setAttribute('aria-busy', 'false');
@@ -55,7 +55,7 @@ function renderFilters() {
   text('labels-count', labels.size || '');
   restoreFocusAfterRender($('labels'), labels.size ? [...labels].sort(([a], [b]) => a.localeCompare(b, getLocale())).map(([label, n]) => `<button class="nav-item ${state.label === label ? 'active' : ''}" data-label="${e(label)}" ${state.label === label ? 'aria-current="page"' : ''}>${icon('folder')}<span>${e(label)}</span><span class="nav-count">${n}</span></button>`).join('') : `<p class="no-labels">${tr('Метки из Transmission появятся здесь')}</p>`);
   const title = state.label ?? FILTERS.find(f => f.id === state.filter)?.title ?? tr('Все торренты');
-  $('page-title').firstChild.textContent = `${title} `;
+  text('page-title-label', title);
   text('total-count', state.label !== null ? labels.get(state.label) || 0 : counts[state.filter]);
 }
 function torrentRow(t) {
