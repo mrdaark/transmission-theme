@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "node scripts/serve.mjs",
     "test": "node --test",
-    "check": "node --check app.js && node --check lib/rpc.js && node --check lib/model.js && node --check lib/demo.js",
+    "check": "node --check app.js && node --check lib/rpc.js && node --check lib/model.js && node --check lib/demo.js && node --check lib/i18n.js",
     "build": "node scripts/build.mjs"
   },
   "engines": { "node": ">=22" }

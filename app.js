@@ -1,3 +1,4 @@
+import { tr, getLocale, getLanguage, setLanguage, translateDocument, LocalizedError } from './lib/i18n.js';
 import { TransmissionRPC } from './lib/rpc.js';
 import { DemoRPC } from './lib/demo.js';
 import { FILTERS, LIST_FIELDS, DETAIL_FIELDS, filterTorrents, matchesFilter, normalizeLabels, status, percent, formatBytes, formatEta, torrentCount, escapeHtml as e, rpcPath, validateRpcPath, validateTorrentUrl } from './lib/model.js';
@@ -8,11 +9,13 @@ const text = (id, value) => { $(id).textContent = value; };
 const demo = new URLSearchParams(location.search).get('demo') === '1';
 const readPref = (key, fallback) => { try { return localStorage.getItem(`transmission-theme:${key}`) || fallback; } catch { return fallback; } };
 const writePref = (key, value) => { try { localStorage.setItem(`transmission-theme:${key}`, value); } catch { /* Storage is optional. */ } };
+setLanguage(readPref('language', 'ru'));
+translateDocument();
 let endpoint;
 try { endpoint = validateRpcPath(readPref('rpc', rpcPath(location.href)), location.href); } catch { endpoint = rpcPath(location.href); }
 let rpc = demo ? new DemoRPC() : new TransmissionRPC(endpoint);
 const savedInterval = Number(readPref('interval', '2000'));
-const state = { torrents: [], session: {}, filter: 'all', label: null, search: '', sort: readPref('sort', 'added'), selectedId: null, detail: null, detailId: null, tab: 'files', connected: false, initialized: false, error: '', interval: [2000, 5000, 10000].includes(savedInterval) ? savedInterval : 2000, history: [], files: [] };
+const state = { torrents: [], session: {}, stats: null, filter: 'all', label: null, search: '', sort: readPref('sort', 'added'), selectedId: null, detail: null, detailId: null, tab: 'files', connected: false, initialized: false, error: '', interval: [2000, 5000, 10000].includes(savedInterval) ? savedInterval : 2000, history: [], files: [] };
 let timer, polling = false, detailLoading = false, generation = 0, operationBusy = false, toastTimer, refreshQueued = false;
 const rendered = new WeakMap();
 
@@ -23,15 +26,16 @@ function toast(message, error = false) {
   $('toast').hidden = false;
   toastTimer = setTimeout(() => { $('toast').hidden = true; }, error ? 7000 : 3500);
 }
-function errorText(error) { return error instanceof TypeError ? 'Не удалось связаться с Transmission. Проверьте подключение и путь к RPC в настройках.' : error.message || String(error); }
+function errorText(error) { return error instanceof TypeError ? tr('Не удалось связаться с Transmission. Проверьте подключение и путь к RPC в настройках.') : error?.message || String(error || ''); }
+function formatRatio(value) { return Math.max(0, value || 0).toLocaleString(getLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 function setConnection(connected, message = '') {
   state.connected = connected;
   state.error = message;
   document.body.classList.toggle('connected', connected);
   document.body.classList.toggle('disconnected', !connected);
-  $('connection-status').innerHTML = `<span class="connection-dot"></span>${connected ? demo ? 'Демонстрация' : 'Сервер подключён' : 'Нет подключения'}`;
+  $('connection-status').innerHTML = `<span class="connection-dot"></span>${connected ? demo ? tr('Демонстрация') : tr('Сервер подключён') : tr('Нет подключения')}`;
   $('connection-error').hidden = !message;
-  text('error-message', message);
+  text('error-message', errorText(message));
   $('torrent-list').setAttribute('aria-busy', 'false');
   $('pause-all').disabled = !connected || operationBusy;
   $('alt-speed').disabled = !connected || operationBusy;
@@ -39,7 +43,7 @@ function setConnection(connected, message = '') {
 }
 function progressMarkup(t, extra = '') {
   const value = t.status === 2 ? t.recheckProgress : t.percentDone;
-  return `<div class="progress ${extra}" style="--progress:${percent(value)}%" role="progressbar" aria-label="${t.status === 2 ? 'Проверка' : 'Загрузка'}" aria-valuenow="${Math.round(percent(value))}" aria-valuemin="0" aria-valuemax="100"></div>`;
+  return `<div class="progress ${extra}" style="--progress:${percent(value)}%" role="progressbar" aria-label="${t.status === 2 ? tr('Проверка') : tr('Загрузка')}" aria-valuenow="${Math.round(percent(value))}" aria-valuemin="0" aria-valuemax="100"></div>`;
 }
 function renderFilters() {
   const counts = Object.fromEntries(FILTERS.map(f => [f.id, state.torrents.filter(t => matchesFilter(t, f.id)).length]));
@@ -49,18 +53,18 @@ function renderFilters() {
   const labels = new Map();
   for (const t of state.torrents) for (const label of new Set(t.labels || [])) labels.set(label, (labels.get(label) || 0) + 1);
   text('labels-count', labels.size || '');
-  restoreFocusAfterRender($('labels'), labels.size ? [...labels].sort(([a], [b]) => a.localeCompare(b, 'ru')).map(([label, n]) => `<button class="nav-item ${state.label === label ? 'active' : ''}" data-label="${e(label)}" ${state.label === label ? 'aria-current="page"' : ''}>${icon('folder')}<span>${e(label)}</span><span class="nav-count">${n}</span></button>`).join('') : '<p class="no-labels">Метки из Transmission<br>появятся здесь</p>');
-  const title = state.label ?? FILTERS.find(f => f.id === state.filter)?.title ?? 'Все торренты';
+  restoreFocusAfterRender($('labels'), labels.size ? [...labels].sort(([a], [b]) => a.localeCompare(b, getLocale())).map(([label, n]) => `<button class="nav-item ${state.label === label ? 'active' : ''}" data-label="${e(label)}" ${state.label === label ? 'aria-current="page"' : ''}>${icon('folder')}<span>${e(label)}</span><span class="nav-count">${n}</span></button>`).join('') : `<p class="no-labels">${tr('Метки из Transmission появятся здесь')}</p>`);
+  const title = state.label ?? FILTERS.find(f => f.id === state.filter)?.title ?? tr('Все торренты');
   $('page-title').firstChild.textContent = `${title} `;
   text('total-count', state.label !== null ? labels.get(state.label) || 0 : counts[state.filter]);
 }
 function torrentRow(t) {
   const s = status(t), p = percent(t.status === 2 ? t.recheckProgress : t.percentDone);
-  const eta = t.status === 4 ? `осталось ${formatEta(t.eta)}` : t.status === 6 ? `рейтинг ${Math.max(0, t.uploadRatio || 0).toFixed(2)}` : t.percentDone >= 1 ? 'скачивание завершено' : `${formatBytes(t.downloadedEver)} из ${formatBytes(t.sizeWhenDone)}`;
-  const subtitle = t.error ? t.errorString : `${t.peersConnected || 0} пиров · ${eta}`;
+  const eta = t.status === 4 ? tr('осталось {time}', { time: formatEta(t.eta) }) : t.status === 6 ? tr('рейтинг {ratio}', { ratio: formatRatio(t.uploadRatio) }) : t.percentDone >= 1 ? tr('скачивание завершено') : tr('{done} из {total}', { done: formatBytes(t.downloadedEver), total: formatBytes(t.sizeWhenDone) });
+  const subtitle = t.error ? t.errorString : `${tr('{count} пиров', { count: t.peersConnected || 0 })} · ${eta}`;
   const speed = t.status === 6 ? `↑ ${formatBytes(t.rateUpload, true)}` : `↓ ${formatBytes(t.rateDownload, true)}`;
   const mobileMeta = t.status === 4 ? `${speed} · ${formatEta(t.eta)}` : t.status === 6 ? speed : formatBytes(t.sizeWhenDone);
-  return `<article class="torrent-row ${t.id === state.selectedId ? 'selected' : ''}" data-id="${t.id}" aria-label="${e(t.name)}"><span class="row-status-icon ${s.tone}">${icon(s.icon)}</span><div class="torrent-name-cell"><button class="torrent-name" data-select="${t.id}" title="${e(t.name)}" aria-expanded="${t.id === state.selectedId}" aria-controls="inspector">${e(t.name)}</button><div class="torrent-subtitle"><span title="${e(subtitle)}">${e(subtitle)}</span>${(t.labels || []).slice(0, 1).map(l => `<span class="row-label">${e(l)}</span>`).join('')}</div></div><div class="row-state ${s.tone}" title="${e(t.error ? t.errorString : s.label)}">${icon(s.icon)}<span>${s.label}</span></div><div class="row-progress">${progressMarkup(t)}<span class="progress-percent">${Math.floor(p)}%</span></div><div class="row-speed">${e(speed)}<span class="upload-speed">${t.status === 4 ? `↑ ${e(formatBytes(t.rateUpload, true))}` : ''}</span></div><div class="row-size">${e(formatBytes(t.sizeWhenDone))}</div><button class="icon-button row-action" data-row-action="${t.status === 0 ? 'start' : 'stop'}" aria-label="${t.status === 0 ? 'Запустить' : 'Приостановить'} ${e(t.name)}" ${!state.connected || operationBusy ? 'disabled' : ''}>${icon(t.status === 0 ? 'play' : 'pause')}</button><div class="mobile-row-footer"><span class="mobile-row-state ${s.tone}">${s.label}</span><span>${e(mobileMeta)}</span></div></article>`;
+  return `<article class="torrent-row ${t.id === state.selectedId ? 'selected' : ''}" data-id="${t.id}" aria-label="${e(t.name)}"><span class="row-status-icon ${s.tone}">${icon(s.icon)}</span><div class="torrent-name-cell"><button class="torrent-name" data-select="${t.id}" title="${e(t.name)}" aria-expanded="${t.id === state.selectedId}" aria-controls="inspector">${e(t.name)}</button><div class="torrent-subtitle"><span title="${e(subtitle)}">${e(subtitle)}</span>${(t.labels || []).slice(0, 1).map(l => `<span class="row-label">${e(l)}</span>`).join('')}</div></div><div class="row-state ${s.tone}" title="${e(t.error ? t.errorString : s.label)}">${icon(s.icon)}<span>${s.label}</span></div><div class="row-progress">${progressMarkup(t)}<span class="progress-percent">${Math.floor(p)}%</span></div><div class="row-speed">${e(speed)}<span class="upload-speed">${t.status === 4 ? `↑ ${e(formatBytes(t.rateUpload, true))}` : ''}</span></div><div class="row-size">${e(formatBytes(t.sizeWhenDone))}</div><button class="icon-button row-action" data-row-action="${t.status === 0 ? 'start' : 'stop'}" aria-label="${t.status === 0 ? tr('Запустить') : tr('Приостановить')} ${e(t.name)}" ${!state.connected || operationBusy ? 'disabled' : ''}>${icon(t.status === 0 ? 'play' : 'pause')}</button><div class="mobile-row-footer"><span class="mobile-row-state ${s.tone}">${s.label}</span><span>${e(mobileMeta)}</span></div></article>`;
 }
 function restoreFocusAfterRender(container, html) {
   const previous = rendered.get(container);
@@ -87,27 +91,30 @@ function renderList() {
   $('empty-state').hidden = visible.length > 0;
   $('torrent-list').hidden = !visible.length;
   const disconnected = !state.connected && !state.initialized;
-  text('empty-title', disconnected ? 'Подключимся к Transmission' : state.torrents.length ? 'Ничего не найдено' : 'Здесь будут ваши торренты');
-  text('empty-description', disconnected ? 'Установите интерфейс на сервер Transmission. Путь к RPC можно изменить в настройках.' : state.torrents.length ? 'Попробуйте другой запрос или выберите другой фильтр.' : 'Добавьте .torrent-файл или magnet-ссылку, чтобы начать загрузку.');
+  text('empty-title', disconnected ? tr('Подключимся к Transmission') : state.torrents.length ? tr('Ничего не найдено') : tr('Здесь будут ваши торренты'));
+  text('empty-description', disconnected ? tr('Установите интерфейс на сервер Transmission. Путь к RPC можно изменить в настройках.') : state.torrents.length ? tr('Попробуйте другой запрос или выберите другой фильтр.') : tr('Добавьте .torrent-файл или magnet-ссылку, чтобы начать загрузку.'));
   $('empty-add').hidden = disconnected || state.torrents.length > 0;
   $('demo-link').hidden = !disconnected;
-  text('list-footer-text', !state.connected ? state.initialized ? 'Соединение потеряно · показаны последние данные' : 'Ожидание подключения к серверу' : demo ? 'Демонстрационные данные' : `Обновление каждые ${state.interval / 1000} секунды`);
+  text('list-footer-text', !state.connected ? state.initialized ? tr('Соединение потеряно · показаны последние данные') : tr('Ожидание подключения к серверу') : demo ? tr('Демонстрационные данные') : tr('Обновление каждые {seconds} секунды', { seconds: state.interval / 1000 }));
   text('session-count', `${torrentCount(state.torrents.length)} · ${formatBytes(state.torrents.reduce((s, t) => s + (t.sizeWhenDone || 0), 0))}`);
 }
-function renderSession(stats) {
+function renderSession(stats, recordHistory = true) {
+  state.stats = stats;
   const down = formatBytes(stats.downloadSpeed, true), split = down.lastIndexOf(' ');
   text('download-rate', down.slice(0, split));
   text('download-unit', down.slice(split + 1));
   text('upload-rate', formatBytes(stats.uploadSpeed, true));
   text('mobile-down', down);
   text('mobile-up', formatBytes(stats.uploadSpeed, true));
-  text('server-version', `Transmission ${state.session.version || ''}`);
+  text('server-version', `Transmission ${state.session.version || ''}${demo ? ` · ${tr('демо')}` : ''}`);
   const enabled = !!state.session['alt-speed-enabled'];
   $('alt-speed').setAttribute('aria-pressed', String(enabled));
   $('mobile-alt').setAttribute('aria-pressed', String(enabled));
-  text('speed-limit', enabled ? `${state.session['alt-speed-down']} КБ/с` : state.session['speed-limit-down-enabled'] ? `${state.session['speed-limit-down']} КБ/с` : 'без лимита');
-  state.history.push(Number(stats.downloadSpeed) || 0);
-  if (state.history.length > 30) state.history.shift();
+  text('speed-limit', enabled ? `${state.session['alt-speed-down']} ${tr('КБ/с')}` : state.session['speed-limit-down-enabled'] ? `${state.session['speed-limit-down']} ${tr('КБ/с')}` : tr('без лимита'));
+  if (recordHistory) {
+    state.history.push(Number(stats.downloadSpeed) || 0);
+    if (state.history.length > 30) state.history.shift();
+  }
   const history = [...Array(Math.max(0, 30 - state.history.length)).fill(0), ...state.history];
   const max = Math.max(...history, 1);
   const points = history.map((v, i) => [i * 180 / 29, 38 - (v / max) * 30]);
@@ -125,12 +132,12 @@ function renderInspector() {
   text('detail-name', t.name);
   const detail = state.detailId === t.id ? state.detail : null;
   const s = status(t);
-  $('detail-badges').innerHTML = `<span class="badge ${s.tone}">${s.label}</span><span class="badge">${detail ? `${detail.files?.length || 0} файлов` : 'Метаданные…'}</span><span class="badge">${t.peersConnected || 0} пиров</span><span class="badge">${e(formatBytes(t.sizeWhenDone))}</span>${(t.labels || []).map(label => `<span class="badge label-badge" title="${e(label)}">${e(label)}</span>`).join('')}`;
+  $('detail-badges').innerHTML = `<span class="badge ${s.tone}">${s.label}</span><span class="badge">${detail ? tr('{count} файлов', { count: detail.files?.length || 0 }) : tr('Метаданные…')}</span><span class="badge">${tr('{count} пиров', { count: t.peersConnected || 0 })}</span><span class="badge">${e(formatBytes(t.sizeWhenDone))}</span>${(t.labels || []).map(label => `<span class="badge label-badge" title="${e(label)}">${e(label)}</span>`).join('')}`;
   $('detail-progress').outerHTML = progressMarkup(t).replace('class="progress', 'id="detail-progress" class="progress');
   text('detail-percent', `${Math.floor(percent(t.status === 2 ? t.recheckProgress : t.percentDone))}%`);
-  $('detail-stats').innerHTML = `<span>${icon('down')} <b>${e(formatBytes(t.rateDownload, true))}</b></span><span>${icon('up')} <b>${e(formatBytes(t.rateUpload, true))}</b></span><span>осталось <b>${e(t.percentDone >= 1 ? '—' : formatEta(t.eta))}</b></span><span>скачано <b>${e(formatBytes(t.downloadedEver))}</b></span><span>отдано <b>${e(formatBytes(t.uploadedEver))}</b></span>`;
+  $('detail-stats').innerHTML = `<span>${icon('down')} <b>${e(formatBytes(t.rateDownload, true))}</b></span><span>${icon('up')} <b>${e(formatBytes(t.rateUpload, true))}</b></span><span>${tr('осталось')} <b>${e(t.percentDone >= 1 ? '—' : formatEta(t.eta))}</b></span><span>${tr('скачано')} <b>${e(formatBytes(t.downloadedEver))}</b></span><span>${tr('отдано')} <b>${e(formatBytes(t.uploadedEver))}</b></span>`;
   const disabled = !state.connected || operationBusy ? 'disabled' : '';
-  restoreFocusAfterRender($('detail-actions'), `<button class="button" data-action="labels" ${disabled}>${icon('tag')}Метки</button><button class="button" data-action="${t.status === 0 ? 'start' : 'stop'}" ${disabled}>${icon(t.status === 0 ? 'play' : 'pause')}${t.status === 0 ? 'Запустить' : 'Приостановить'}</button><button class="icon-button" data-action="verify" title="Проверить локальные данные" aria-label="Проверить локальные данные" ${disabled}>${icon('refresh')}</button><button class="icon-button" data-action="copy" title="Скопировать magnet" aria-label="Скопировать magnet" ${!detail?.magnetLink ? 'disabled' : ''}>${icon('link')}</button><button class="icon-button danger-icon" data-action="remove" title="Удалить торрент" aria-label="Удалить торрент" ${disabled}>${icon('trash')}</button>`);
+  restoreFocusAfterRender($('detail-actions'), `<button class="button" data-action="labels" ${disabled}>${icon('tag')}${tr('Метки')}</button><button class="button" data-action="${t.status === 0 ? 'start' : 'stop'}" ${disabled}>${icon(t.status === 0 ? 'play' : 'pause')}${t.status === 0 ? tr('Запустить') : tr('Приостановить')}</button><button class="icon-button" data-action="verify" title="${tr('Проверить локальные данные')}" aria-label="${tr('Проверить локальные данные')}" ${disabled}>${icon('refresh')}</button><button class="icon-button" data-action="copy" title="${tr('Скопировать magnet')}" aria-label="${tr('Скопировать magnet')}" ${!detail?.magnetLink ? 'disabled' : ''}>${icon('link')}</button><button class="icon-button danger-icon" data-action="remove" title="${tr('Удалить торрент')}" aria-label="${tr('Удалить торрент')}" ${disabled}>${icon('trash')}</button>`);
   renderPieces(detail);
   renderDetailContent();
 }
@@ -160,19 +167,19 @@ function renderPieces(detail) {
 function renderDetailContent() {
   const t = selectedTorrent(), detail = state.detailId === t?.id ? state.detail : null;
   if (!t) return;
-  if (!detail) { $('detail-content').innerHTML = '<p class="detail-message">Загрузка подробностей…</p>'; return; }
+  if (!detail) { $('detail-content').innerHTML = `<p class="detail-message">${tr('Загрузка подробностей…')}</p>`; return; }
   if (state.tab === 'files') {
     const files = detail.files || [];
     restoreFocusAfterRender($('detail-content'), files.length ? files.map((f, i) => {
       const stat = detail.fileStats?.[i] || {}, p = f.length ? percent((stat.bytesCompleted ?? f.bytesCompleted) / f.length) : 100;
-      return `<div class="file-row" style="--progress:${p}"><input type="checkbox" data-file-index="${i}" aria-label="Скачивать ${e(f.name)}" ${stat.wanted !== false && stat.wanted !== 0 ? 'checked' : ''} ${!state.connected || operationBusy ? 'disabled' : ''}>${icon('file')}<span class="file-name" title="${e(f.name)}">${e(f.name)}</span><span class="file-size">${e(formatBytes(f.length))}</span><span class="file-percent">${Math.floor(p)}%</span><select data-priority="${i}" aria-label="Приоритет ${e(f.name)}" ${!state.connected || operationBusy ? 'disabled' : ''}>${[[-1, 'Низкий'], [0, 'Обычный'], [1, 'Высокий']].map(([value, label]) => `<option value="${value}" ${Number(stat.priority || 0) === value ? 'selected' : ''}>${label}</option>`).join('')}</select></div>`;
-    }).join('') : '<p class="detail-message">Список файлов появится после получения метаданных.</p>');
+      return `<div class="file-row" style="--progress:${p}"><input type="checkbox" data-file-index="${i}" aria-label="${e(tr('Скачивать {name}', { name: f.name }))}" ${stat.wanted !== false && stat.wanted !== 0 ? 'checked' : ''} ${!state.connected || operationBusy ? 'disabled' : ''}>${icon('file')}<span class="file-name" title="${e(f.name)}">${e(f.name)}</span><span class="file-size">${e(formatBytes(f.length))}</span><span class="file-percent">${Math.floor(p)}%</span><select data-priority="${i}" aria-label="${e(tr('Приоритет {name}', { name: f.name }))}" ${!state.connected || operationBusy ? 'disabled' : ''}>${[[-1, tr('Низкий')], [0, tr('Обычный')], [1, tr('Высокий')]].map(([value, label]) => `<option value="${value}" ${Number(stat.priority || 0) === value ? 'selected' : ''}>${label}</option>`).join('')}</select></div>`;
+    }).join('') : `<p class="detail-message">${tr('Список файлов появится после получения метаданных.')}</p>`);
   } else if (state.tab === 'trackers') {
-    $('detail-content').innerHTML = detail.trackerStats?.length ? `<table class="detail-table"><thead><tr><th>Трекер</th><th>Сиды</th><th>Пиры</th><th>Действие</th></tr></thead><tbody>${detail.trackerStats.map(tr => `<tr><td><span class="tracker-host" title="${e(tr.announce)}">${e(tr.host || tr.announce)}</span><span class="tracker-result" title="${e(tr.lastAnnounceResult)}">${e(tr.lastAnnounceResult || 'Ожидание ответа')}</span></td><td>${tr.seederCount >= 0 ? Number(tr.seederCount) : '—'}</td><td>${tr.leecherCount >= 0 ? Number(tr.leecherCount) : '—'}</td><td><button class="text-button" data-action="reannounce" ${!state.connected || operationBusy ? 'disabled' : ''}>Обновить</button></td></tr>`).join('')}</tbody></table>` : '<p class="detail-message">У этого торрента нет трекеров.</p>';
+    $('detail-content').innerHTML = detail.trackerStats?.length ? `<table class="detail-table"><thead><tr><th>${tr('Трекер')}</th><th>${tr('Сиды')}</th><th>${tr('Пиры')}</th><th>${tr('Действие')}</th></tr></thead><tbody>${detail.trackerStats.map(tracker => `<tr><td><span class="tracker-host" title="${e(tracker.announce)}">${e(tracker.host || tracker.announce)}</span><span class="tracker-result" title="${e(tracker.lastAnnounceResult)}">${e(tracker.lastAnnounceResult || tr('Ожидание ответа'))}</span></td><td>${tracker.seederCount >= 0 ? Number(tracker.seederCount) : '—'}</td><td>${tracker.leecherCount >= 0 ? Number(tracker.leecherCount) : '—'}</td><td><button class="text-button" data-action="reannounce" ${!state.connected || operationBusy ? 'disabled' : ''}>${tr('Обновить')}</button></td></tr>`).join('')}</tbody></table>` : `<p class="detail-message">${tr('У этого торрента нет трекеров.')}</p>`;
   } else if (state.tab === 'peers') {
-    $('detail-content').innerHTML = detail.peers?.length ? `<table class="detail-table"><thead><tr><th>Адрес</th><th>Клиент</th><th>Прогресс</th><th>↓ Скачивание</th><th>↑ Отдача</th></tr></thead><tbody>${detail.peers.map(p => `<tr><td>${e(p.address)}${p.isEncrypted ? ' ◦' : ''}</td><td>${e(p.clientName)}</td><td>${Math.floor(percent(p.progress))}%</td><td>${e(formatBytes(p.rateToClient, true))}</td><td>${e(formatBytes(p.rateToPeer, true))}</td></tr>`).join('')}</tbody></table>` : '<p class="detail-message">Сейчас нет подключённых пиров.</p>';
+    $('detail-content').innerHTML = detail.peers?.length ? `<table class="detail-table"><thead><tr><th>${tr('Адрес')}</th><th>${tr('Клиент')}</th><th>${tr('Прогресс')}</th><th>${tr('↓ Скачивание')}</th><th>${tr('↑ Отдача')}</th></tr></thead><tbody>${detail.peers.map(p => `<tr><td>${e(p.address)}${p.isEncrypted ? ' ◦' : ''}</td><td>${e(p.clientName)}</td><td>${Math.floor(percent(p.progress))}%</td><td>${e(formatBytes(p.rateToClient, true))}</td><td>${e(formatBytes(p.rateToPeer, true))}</td></tr>`).join('')}</tbody></table>` : `<p class="detail-message">${tr('Сейчас нет подключённых пиров.')}</p>`;
   } else {
-    $('detail-content').innerHTML = `<dl class="info-grid"><dt>Размер</dt><dd>${e(formatBytes(t.totalSize))}</dd><dt>Рейтинг</dt><dd>${Math.max(0, t.uploadRatio || 0).toFixed(2)}</dd><dt>Добавлен</dt><dd>${e(new Date(t.addedDate * 1000).toLocaleString('ru-RU'))}</dd><dt>Приватный</dt><dd>${detail.isPrivate ? 'Да' : 'Нет'}</dd><dt>Папка</dt><dd class="wide">${e(t.downloadDir)}</dd><dt>Хеш</dt><dd class="wide">${e(detail.hashString || '—')}</dd><dt>Создан в</dt><dd class="wide">${e(detail.creator || '—')}</dd><dt>Комментарий</dt><dd class="wide">${e(detail.comment || '—')}</dd>${t.error ? `<dt>Ошибка</dt><dd class="wide error">${e(t.errorString)}</dd>` : ''}</dl>`;
+    $('detail-content').innerHTML = `<dl class="info-grid"><dt>${tr('Размер')}</dt><dd>${e(formatBytes(t.totalSize))}</dd><dt>${tr('Рейтинг')}</dt><dd>${formatRatio(t.uploadRatio)}</dd><dt>${tr('Добавлен')}</dt><dd>${e(new Date(t.addedDate * 1000).toLocaleString(getLocale()))}</dd><dt>${tr('Приватный')}</dt><dd>${detail.isPrivate ? tr('Да') : tr('Нет')}</dd><dt>${tr('Папка')}</dt><dd class="wide">${e(t.downloadDir)}</dd><dt>${tr('Хеш')}</dt><dd class="wide">${e(detail.hashString || '—')}</dd><dt>${tr('Создан в')}</dt><dd class="wide">${e(detail.creator || '—')}</dd><dt>${tr('Комментарий')}</dt><dd class="wide">${e(detail.comment || '—')}</dd>${t.error ? `<dt>${tr('Ошибка')}</dt><dd class="wide error">${e(t.errorString)}</dd>` : ''}</dl>`;
   }
 }
 async function loadDetail() {
@@ -232,7 +239,7 @@ async function poll() {
     if (state.selectedId !== null) await loadDetail();
   } catch (error) {
     if (version !== generation) return;
-    setConnection(false, errorText(error));
+    setConnection(false, error);
     renderList(); renderInspector();
   } finally {
     polling = false;
@@ -266,14 +273,14 @@ async function action(name, id = state.selectedId) {
   }
   if (name === 'copy') {
     try {
-      if (state.detailId !== id || !state.detail?.magnetLink) throw new Error('Magnet-ссылка ещё не получена.');
+      if (state.detailId !== id || !state.detail?.magnetLink) throw new LocalizedError('Magnet-ссылка ещё не получена.');
       await navigator.clipboard.writeText(state.detail.magnetLink);
-      toast('Magnet-ссылка скопирована');
-    } catch { toast('Копирование недоступно. Браузеру нужен HTTPS или разрешение на буфер обмена.', true); }
+      toast(tr('Magnet-ссылка скопирована'));
+    } catch { toast(tr('Копирование недоступно. Браузеру нужен HTTPS или разрешение на буфер обмена.'), true); }
     return;
   }
   const method = { start: 'torrent-start', stop: 'torrent-stop', verify: 'torrent-verify', reannounce: 'torrent-reannounce' }[name];
-  if (method) await mutate(method, { ids: [id] }, { start: 'Торрент запущен', stop: 'Торрент приостановлен', verify: 'Проверка данных запрошена', reannounce: 'Запрошено обновление трекеров' }[name]);
+  if (method) await mutate(method, { ids: [id] }, { start: tr('Торрент запущен'), stop: tr('Торрент приостановлен'), verify: tr('Проверка данных запрошена'), reannounce: tr('Запрошено обновление трекеров') }[name]);
 }
 let labelsTarget = null, labelsDraft = [], labelsSaving = false;
 function openLabels(t) {
@@ -286,8 +293,8 @@ function openLabels(t) {
   $('new-label').focus();
 }
 function renderLabelEditor() {
-  $('assigned-labels').innerHTML = labelsDraft.length ? labelsDraft.map((label, i) => `<button type="button" class="label-chip selected" data-remove-label="${i}" aria-label="Убрать метку ${e(label)}">${icon('tag')}<span>${e(label)}</span>${icon('close')}</button>`).join('') : '<p class="field-hint">У этого торрента пока нет меток.</p>';
-  const available = normalizeLabels(state.torrents.flatMap(t => t.labels || [])).filter(label => !labelsDraft.includes(label)).sort((a, b) => a.localeCompare(b, 'ru'));
+  $('assigned-labels').innerHTML = labelsDraft.length ? labelsDraft.map((label, i) => `<button type="button" class="label-chip selected" data-remove-label="${i}" aria-label="${e(tr('Убрать метку {label}', { label }))}">${icon('tag')}<span>${e(label)}</span>${icon('close')}</button>`).join('') : `<p class="field-hint">${tr('У этого торрента пока нет меток.')}</p>`;
+  const available = normalizeLabels(state.torrents.flatMap(t => t.labels || [])).filter(label => !labelsDraft.includes(label)).sort((a, b) => a.localeCompare(b, getLocale()));
   $('label-suggestions').innerHTML = available.map(label => `<button type="button" class="label-chip" data-suggest-label="${e(label)}">${icon('plus')}<span>${e(label)}</span></button>`).join('');
   $('suggested-labels').hidden = !available.length;
 }
@@ -310,7 +317,7 @@ $('labels-form').addEventListener('submit', async event => {
   if (labelsSaving) return;
   const target = labelsTarget;
   if (!target || target.generation !== generation || !state.connected || !state.torrents.some(t => t.id === target.id)) {
-    showFormError('labels-error', 'Торрент недоступен. Проверьте подключение и откройте редактор заново.'); return;
+    showFormError('labels-error', tr('Торрент недоступен. Проверьте подключение и откройте редактор заново.')); return;
   }
   const labels = normalizeLabels([...labelsDraft, $('new-label').value]);
   labelsSaving = true; $('labels-error').hidden = true;
@@ -325,16 +332,22 @@ $('labels-form').addEventListener('submit', async event => {
       if (state.label !== null && !state.torrents.some(t => (t.labels || []).includes(state.label))) state.label = null;
       renderList(); renderInspector();
     }
-    $('labels-dialog').close(); toast('Метки сохранены');
+    $('labels-dialog').close(); toast(tr('Метки сохранены'));
   } catch (error) { showFormError('labels-error', errorText(error)); }
   finally { labelsSaving = false; controls.forEach(control => { control.disabled = false; }); void poll(); }
 });
 function openAdd(magnet = false) {
-  $('add-form').reset(); state.files = []; text('file-label', 'Выберите .torrent-файлы');
+  $('add-form').reset(); state.files = []; text('file-label', tr('Выберите .torrent-файлы'));
   $('download-dir').value = state.session['download-dir'] || '';
   $('add-error').hidden = true;
   $('add-dialog').showModal();
   if (magnet) $('torrent-url').focus();
+}
+let settingsBaseline = {};
+function readServerSettings() {
+  const args = { 'speed-limit-down-enabled': $('limit-down-enabled').checked, 'speed-limit-up-enabled': $('limit-up-enabled').checked, 'speed-limit-down': Number($('limit-down').value), 'speed-limit-up': Number($('limit-up').value), 'alt-speed-down': Number($('alt-down').value), 'alt-speed-up': Number($('alt-up').value) };
+  if ($('setting-dir').value.trim()) args['download-dir'] = $('setting-dir').value.trim();
+  return args;
 }
 function openSettings() {
   const s = state.session;
@@ -346,23 +359,25 @@ function openSettings() {
   $('alt-down').value = s['alt-speed-down'] ?? 500;
   $('alt-up').value = s['alt-speed-up'] ?? 100;
   $('refresh-interval').value = String(state.interval);
+  $('interface-language').value = getLanguage();
   $('rpc-path').value = endpoint;
+  settingsBaseline = readServerSettings();
   $('settings-error').hidden = true;
   $('settings-dialog').showModal();
 }
 function showFormError(id, message) { text(id, message); $(id).hidden = false; }
 function setFiles(files) {
   try {
-    if (files.length > 25) throw new Error('Можно добавить до 25 файлов за один раз.');
+    if (files.length > 25) throw new LocalizedError('Можно добавить до 25 файлов за один раз.');
     for (const f of files) {
-      if (!f.name.toLowerCase().endsWith('.torrent')) throw new Error(`${f.name}: выберите .torrent-файл.`);
-      if (f.size > 10 * 1024 * 1024) throw new Error(`${f.name}: файл больше 10 МБ.`);
-      if (!f.size) throw new Error(`${f.name}: пустой файл.`);
+      if (!f.name.toLowerCase().endsWith('.torrent')) throw new LocalizedError('{name}: выберите .torrent-файл.', { name: f.name });
+      if (f.size > 10 * 1024 * 1024) throw new LocalizedError('{name}: файл больше 10 МБ.', { name: f.name });
+      if (!f.size) throw new LocalizedError('{name}: пустой файл.', { name: f.name });
     }
     state.files = [...files];
-    text('file-label', files.length === 1 ? files[0].name : files.length ? `Выбрано файлов: ${files.length}` : 'Выберите .torrent-файлы');
+    text('file-label', files.length === 1 ? files[0].name : files.length ? tr('Выбрано файлов: {count}', { count: files.length }) : tr('Выберите .torrent-файлы'));
     $('add-error').hidden = true;
-  } catch (error) { state.files = []; $('torrent-file').value = ''; text('file-label', 'Выберите .torrent-файлы'); showFormError('add-error', error.message); }
+  } catch (error) { state.files = []; $('torrent-file').value = ''; text('file-label', tr('Выберите .torrent-файлы')); showFormError('add-error', error.message); }
 }
 async function fileBase64(file) {
   const bytes = new Uint8Array(await file.arrayBuffer());
@@ -419,10 +434,10 @@ $('retry').addEventListener('click', () => { void poll(); });
 $('close-inspector').addEventListener('click', closeInspector);
 $('pause-all').addEventListener('click', () => {
   const ids = state.torrents.filter(t => t.status !== 0).map(t => t.id);
-  if (ids.length) void mutate('torrent-stop', { ids }, 'Все активные торренты приостановлены');
-  else toast('Все торренты уже на паузе');
+  if (ids.length) void mutate('torrent-stop', { ids }, tr('Все активные торренты приостановлены'));
+  else toast(tr('Все торренты уже на паузе'));
 });
-async function toggleAlt() { await mutate('session-set', { 'alt-speed-enabled': !state.session['alt-speed-enabled'] }, 'Лимиты скорости обновлены'); }
+async function toggleAlt() { await mutate('session-set', { 'alt-speed-enabled': !state.session['alt-speed-enabled'] }, tr('Лимиты скорости обновлены')); }
 $('alt-speed').addEventListener('click', toggleAlt);
 $('mobile-alt').addEventListener('click', toggleAlt);
 $('torrent-file').addEventListener('change', event => setFiles([...event.target.files]));
@@ -434,9 +449,9 @@ $('add-form').addEventListener('submit', async event => {
   event.preventDefault();
   const url = $('torrent-url').value.trim(), files = [...state.files];
   $('add-error').hidden = true;
-  if (!files.length && !url) { showFormError('add-error', 'Выберите .torrent-файл или вставьте magnet-ссылку.'); return; }
-  if (url) try { validateTorrentUrl(url); } catch { showFormError('add-error', 'Проверьте ссылку: нужен magnet или HTTP(S)-адрес .torrent-файла.'); return; }
-  if (!state.connected) { showFormError('add-error', 'Сначала подключитесь к Transmission.'); return; }
+  if (!files.length && !url) { showFormError('add-error', tr('Выберите .torrent-файл или вставьте magnet-ссылку.')); return; }
+  if (url) try { validateTorrentUrl(url); } catch { showFormError('add-error', tr('Проверьте ссылку: нужен magnet или HTTP(S)-адрес .torrent-файла.')); return; }
+  if (!state.connected) { showFormError('add-error', tr('Сначала подключитесь к Transmission.')); return; }
   const button = $('add-submit'); button.disabled = true;
   const client = rpc;
   const args = { paused: !$('start-added').checked };
@@ -448,16 +463,16 @@ $('add-form').addEventListener('submit', async event => {
     try {
       const result = await client.call('torrent-add', { ...args, ...(item.file ? { metainfo: await fileBase64(item.file) } : { filename: item.url }) });
       if (result['torrent-duplicate']) duplicates++; else added++;
-    } catch (error) { failed.push({ ...item, message: `${item.file?.name || 'Ссылка'}: ${errorText(error)}` }); }
+    } catch (error) { failed.push({ ...item, message: `${item.file?.name || tr('Ссылка')}: ${errorText(error)}` }); }
   }
   button.disabled = false;
   if (failed.length) {
     // Keep only failed inputs, so retrying cannot accidentally submit successful files again.
     state.files = failed.filter(f => f.file).map(f => f.file);
-    text('file-label', state.files.length ? `Осталось файлов: ${state.files.length}` : 'Выберите .torrent-файлы');
+    text('file-label', state.files.length ? tr('Осталось файлов: {count}', { count: state.files.length }) : tr('Выберите .torrent-файлы'));
     $('torrent-url').value = failed.find(f => f.url)?.url || '';
-    showFormError('add-error', `${added ? `Добавлено: ${added}. ` : ''}${duplicates ? `Уже в списке: ${duplicates}. ` : ''}${failed.map(f => f.message).join(' ')}`);
-  } else { $('add-dialog').close(); toast(`Добавлено: ${added}${duplicates ? ` · уже в списке: ${duplicates}` : ''}`); }
+    showFormError('add-error', `${added ? `${tr('Добавлено: {count}', { count: added })}. ` : ''}${duplicates ? `${tr('Уже в списке: {count}', { count: duplicates })}. ` : ''}${failed.map(f => f.message).join(' ')}`);
+  } else { $('add-dialog').close(); toast(`${tr('Добавлено: {count}', { count: added })}${duplicates ? ` · ${tr('уже в списке: {count}', { count: duplicates })}` : ''}`); }
   void poll();
 });
 $('settings-form').addEventListener('submit', async event => {
@@ -469,32 +484,36 @@ $('settings-form').addEventListener('submit', async event => {
   // Switching endpoints saves only local connection preferences, never server settings
   // loaded from a different daemon. Reopen settings after the new connection succeeds.
   if (!changedEndpoint && state.connected) {
-    const args = { 'speed-limit-down-enabled': $('limit-down-enabled').checked, 'speed-limit-up-enabled': $('limit-up-enabled').checked, 'speed-limit-down': Number($('limit-down').value), 'speed-limit-up': Number($('limit-up').value), 'alt-speed-down': Number($('alt-down').value), 'alt-speed-up': Number($('alt-up').value) };
-    if ($('setting-dir').value.trim()) args['download-dir'] = $('setting-dir').value.trim();
+    const args = Object.fromEntries(Object.entries(readServerSettings()).filter(([key, value]) => value !== settingsBaseline[key]));
     $('settings-submit').disabled = true;
-    try { await rpc.call('session-set', args); }
+    try { if (Object.keys(args).length) await rpc.call('session-set', args); }
     catch (error) { showFormError('settings-error', errorText(error)); return; }
     finally { $('settings-submit').disabled = false; }
   }
   state.interval = Number($('refresh-interval').value); writePref('interval', state.interval);
+  setLanguage($('interface-language').value); writePref('language', getLanguage());
+  translateDocument();
   if (changedEndpoint) {
     endpoint = path; writePref('rpc', endpoint); generation++;
     rpc = demo ? rpc : new TransmissionRPC(endpoint);
-    state.torrents = []; state.session = {}; state.initialized = false; state.selectedId = null; state.detail = null; state.detailId = null; state.history = [];
+    state.torrents = []; state.session = {}; state.stats = null; state.initialized = false; state.selectedId = null; state.detail = null; state.detailId = null; state.history = [];
     setConnection(false); renderList(); renderInspector();
   }
   $('settings-dialog').close();
-  toast(changedEndpoint ? 'Путь к RPC сохранён. Подключаемся…' : state.connected ? 'Настройки сохранены' : 'Настройки интерфейса сохранены. Подключаемся…');
+  setConnection(state.connected, state.error);
+  if (state.stats) renderSession(state.stats, false);
+  renderList(); renderInspector();
+  toast(changedEndpoint ? tr('Путь к RPC сохранён. Подключаемся…') : state.connected ? tr('Настройки сохранены') : tr('Настройки интерфейса сохранены. Подключаемся…'));
   void poll();
 });
 $('remove-form').addEventListener('submit', async event => {
   event.preventDefault();
-  if (!removeTarget || !state.connected) { showFormError('remove-error', 'Нет подключения к Transmission.'); return; }
+  if (!removeTarget || !state.connected) { showFormError('remove-error', tr('Нет подключения к Transmission.')); return; }
   $('remove-submit').disabled = true; $('remove-error').hidden = true;
   try {
     await rpc.call('torrent-remove', { ids: [removeTarget.id], 'delete-local-data': $('delete-data').checked });
     if (state.selectedId === removeTarget.id) closeInspector();
-    $('remove-dialog').close(); toast('Торрент удалён'); void poll();
+    $('remove-dialog').close(); toast(tr('Торрент удалён')); void poll();
   } catch (error) { showFormError('remove-error', errorText(error)); }
   finally { $('remove-submit').disabled = false; }
 });
@@ -518,5 +537,5 @@ document.addEventListener('keydown', event => {
 document.addEventListener('visibilitychange', () => { if (document.hidden) clearTimeout(timer); else void poll(); });
 window.addEventListener('online', () => { void poll(); });
 matchMedia('(max-width: 900px)').addEventListener('change', updateInspectorAccess);
-window.addEventListener('offline', () => { setConnection(false, 'Нет соединения с сетью. После восстановления подключение возобновится.'); renderList(); renderInspector(); });
+window.addEventListener('offline', () => { setConnection(false, new LocalizedError('Нет соединения с сетью. После восстановления подключение возобновится.')); renderList(); renderInspector(); });
 void poll();
