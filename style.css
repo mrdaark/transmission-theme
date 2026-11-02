@@ -36,6 +36,7 @@ button,a,input,select {
 }
 button {
   color:inherit;
+  font-weight:700;
   cursor:pointer
 }
 button:disabled {
@@ -218,6 +219,7 @@ svg.icon {
   color:var(--blue)
 }
 .nav-count {
+  font-weight:700;
   margin-left:auto;
   font-size:12px;
   background:#1b1d22;
@@ -406,10 +408,13 @@ svg.icon {
 }
 .page-header {
   display:flex;
-  align-items:center;
+  align-items:flex-end;
   justify-content:space-between;
   margin-bottom:29px;
   gap:15px
+}
+.desktop-title {
+  min-width:0;
 }
 .eyebrow {
   color:var(--faint);
@@ -420,34 +425,60 @@ svg.icon {
 }
 h1 {
   font-size:26px;
+  line-height:32px;
   font-weight:550;
   letter-spacing:-.8px;
   display:flex;
   align-items:center;
   gap:12px
 }
+#page-title-label {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
 h1>#total-count {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  min-width:32px;
+  height:28px;
   font-size:13px;
+  line-height:14px;
   font-family:var(--mono);
   color:#a4a9b4;
   background:#1a1d23;
   border:1px solid #242831;
   border-radius:6px;
-  padding:4px 7px;
+  padding:0 7px;
   letter-spacing:0;
-  font-weight:400
+  font-weight:700
 }
 .header-right {
   display:flex;
   align-items:center;
+  flex-shrink:0;
+  min-height:32px;
   gap:16px
 }
 .connection-status {
   display:flex;
   align-items:center;
+  min-height:32px;
   gap:7px;
   font-size:13px;
+  line-height:20px;
+  white-space:nowrap;
   color:var(--muted)
+}
+.connection-status .connection-dot {
+  width:6px;
+  height:6px;
+}
+#connection-status-text {
+  display:block;
 }
 .mobile-brand,.mobile-rates,.mobile-settings {
   display:none!important
@@ -520,7 +551,7 @@ h1>#total-count {
   justify-content:center;
   gap:8px;
   font-size:13px;
-  font-weight:500;
+  font-weight:700;
   white-space:nowrap;
   transition:background .15s,border-color .15s
 }
@@ -536,7 +567,7 @@ h1>#total-count {
   background:var(--blue);
   color:#101d31;
   border-color:var(--blue);
-  font-weight:650;
+  font-weight:700;
   box-shadow:0 1px 1px #0003
 }
 .primary:hover {
@@ -735,7 +766,7 @@ h1>#total-count {
   text-overflow:ellipsis;
   white-space:nowrap;
   font-size:14px;
-  font-weight:550;
+  font-weight:700;
   color:#dfe2e8;
   letter-spacing:.02px;
   text-align:left;
@@ -1444,6 +1475,8 @@ h1>#total-count {
   gap:18px
 }
 .settings-grid .check-label {
+  min-height:20px;
+  line-height:20px;
   font-size:12px;
   margin-top:3px;
   margin-bottom:11px;
@@ -1453,6 +1486,7 @@ h1>#total-count {
   margin-top:0
 }
 .unit-field {
+  min-height:44px;
   display:flex;
   align-items:center;
   gap:10px;
@@ -1465,13 +1499,24 @@ h1>#total-count {
   font-size:12px
 }
 .unit-field input {
-  width:100%;
+  flex:1 1 0;
+  width:0;
+  height:42px;
   min-width:0;
   background:none;
   border:0;
   color:#d7deea;
-  padding:11px 12px;
+  padding:0 12px;
+  line-height:20px;
   font-size:14px
+}
+.unit-field>span {
+  flex:0 0 auto;
+  white-space:nowrap;
+  line-height:20px;
+}
+.check-label input {
+  flex-shrink:0;
 }
 .field-hint {
   font-size:12px;
@@ -1802,7 +1847,8 @@ h1>#total-count {
   }
   .page-header {
     margin-bottom:25px;
-    gap:10px
+    gap:10px;
+    align-items:center
   }
   .desktop-title,.connection-status {
     display:none
@@ -1899,6 +1945,7 @@ h1>#total-count {
     background:#0d0e10
   }
   .filter-chip>span {
+    font-weight:700;
     font-size:12px;
     color:#5a6372;
     font-family:var(--mono)
@@ -1978,7 +2025,7 @@ h1>#total-count {
   .torrent-name {
     font-size:15px;
     color:#e0e4eb;
-    font-weight:550;
+    font-weight:700;
     line-height:1.7
   }
   .torrent-subtitle {
@@ -2340,6 +2387,12 @@ h1>#total-count {
   }
   .demo-banner:not([hidden])+.app-shell .workspace {
     min-height:calc(100dvh - 40px)
+  }
+}
+@media(max-width:420px) {
+  .settings-grid {
+    grid-template-columns:minmax(0,1fr);
+    gap:14px;
   }
 }
 @media(max-width:360px) {
